@@ -1,0 +1,60 @@
+<main_program> program RB COB <decl_stmts> <assgmt_stmts> CCB
+<decl_stmts> <one_decl> <decl_stmts>
+<decl_stmts> <one_decl>
+<assgmt_stmts> <one_assgmt> <assgmt_stmts>
+<assgmt_stmts> <one_assgmt>
+<one_decl> <single_decl>
+<one_decl> <decl_list>
+<single_decl> <single_prim> 
+<single_decl> <single_rarr>
+<single_decl> <single_jarr2d>
+<single_decl> <single_jarr3d>
+<decl_list> <list_prim> 
+<decl_list> <list_rarr>
+<decl_list> <list_jarr2d>
+<decl_list> <list_jarr3d>
+<single_prim> declare VAR_NAME COL integer SC
+<single_prim> declare VAR_NAME COL boolean SC
+<single_prim> declare VAR_NAME COL real SC
+<list_prim> declare list of variables VAR_NAME VAR_NAME <var_list> COL integer SC
+<list_prim> declare list of variables VAR_NAME VAR_NAME <var_list> COL boolean SC
+<list_prim> declare list of variables VAR_NAME VAR_NAME <var_list> COL real SC
+<var_list> VAR_NAME <var_list>
+<var_list> epsilon
+<single_rarr> declare VAR_NAME COL array <dim_rarr> of integer SC
+<list_rarr> declare list of variables VAR_NAME VAR_NAME <var_list> COL array <dim_rarr> of integer SC
+<dim_rarr> <one_range> <dim_rarr>
+<dim_rarr> <one_range>
+<one_range> SOB <index_> TO <index_> SCB 
+<single_jarr2d> declare VAR_NAME COL jagged array <dim_jarr2d> of integer SC <ranges_desc>
+<list_jarr2d> declare list of variables VAR_NAME VAR_NAME <var_list> COL jagged array <dim_jarr2d> of integer SC <ranges_desc>
+<ranges_desc> <one_range_desc> <ranges_desc>
+<ranges_desc> <one_range_desc>
+<one_range_desc> R1 SOB STATIC_CNST SCB COL size STATIC_CNST COL values COB <dim_values> <static_cnst_list> CCB 
+<dim_values> <static_cnst_list> SC <dim_values>
+<dim_values> epsilon
+<dim_jarr2d> SOB STATIC_CNST TO STATIC_CNST SCB SOB SCB 
+<single_jarr3d> declare VAR_NAME COL jagged array <dim_jarr3d> of integer SC <ranges_desc>
+<list_jarr3d> declare list of variables VAR_NAME VAR_NAME <var_list> COL jagged array <dim_jarr3d> of integer SC <ranges_desc>
+<static_cnst_list> STATIC_CNST <static_cnst_list>
+<static_cnst_list> epsilon
+<dim_jarr3d> SOB STATIC_CNST TO STATIC_CNST SCB SOB SCB SOB SCB 
+<one_assgmt> <lhs_op> ASSGN_OP <bool_expr1> SC
+<one_assgmt> <lhs_op> ASSGN_OP <arith_expr1> SC
+<arith_expr1> <arith_expr1> AR_OP1 <arith_expr2>
+<arith_expr1> <arith_expr2>
+<arith_expr2> <arith_expr2> AR_OP2 <rhs_op>
+<arith_expr2> <rhs_op>
+<rhs_op> <array_elem>
+<rhs_op> <index_>
+<lhs_op> <array_elem>
+<lhs_op> VAR_NAME
+<bool_expr1> <bool_expr1> BOOL_AND <bool_expr2>
+<bool_expr1> <bool_expr2>
+<bool_expr2> <bool_expr2> BOOL_OR <rhs_op>
+<bool_expr2> <rhs_op>
+<array_elem> VAR_NAME SOB <index_> <index_list> SCB
+<index_> VAR_NAME
+<index_> STATIC_CNST
+<index_list> <index_> <index_list>
+<index_list> epsilon
