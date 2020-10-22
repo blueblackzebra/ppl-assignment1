@@ -1,7 +1,13 @@
-wLK dasdsa adas adsda
-adasf adas adfasf rht
-afsf grth weqw ew asdasdsa
-asfnbasmnf asdfa
-afsabsf asdasdsadsafasf
-irtijdnjfn afsjksf
-fsdgkgd,sn etkjetkel
+<main_program> program RB COB <decl_stmts> CCB
+<decl_stmts> <one_decl>
+<decl_stmts> <one_decl> <decl_stmts>
+<one_decl> <single_decl>
+<one_decl> <decl_list>
+<single_decl> <single_prim>
+<decl_list> <list_prim>
+<single_prim> declare VAR_NAME COL integer SC
+<single_prim> declare VAR_NAME COL boolean SC
+<list_prim> declare list of variables VAR_NAME <var_list> COL integer SC
+<list_prim> declare list of variables VAR_NAME <var_list> COL boolean SC
+<var_list> VAR_NAME
+<var_list> VAR_NAME <var_list>

@@ -24,7 +24,7 @@ void traverseS(tokenStream * s){
 
 tokenStream * tokeniseSourceCode(char * filename,tokenStream *s){
     FILE * filep=fopen(filename,"r");
-    s=(tokenStream *)malloc(sizeof(tokenStream *));
+    s=(tokenStream *)malloc(sizeof(tokenStream));
     tokenStream * ret=s;
 
     char * line=(char *)malloc(200*sizeof(char));
@@ -54,7 +54,7 @@ tokenStream * tokeniseSourceCode(char * filename,tokenStream *s){
             printf("%s %d\n",s->lexeme,s->line_num);
             tempStr=strtok(NULL," ");
 
-            s->next=(tokenStream *)malloc(sizeof(tokenStream *));
+            s->next=(tokenStream *)malloc(sizeof(tokenStream));
             s=s->next;
         }
 

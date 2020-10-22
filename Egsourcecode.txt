@@ -1,6 +1,4 @@
-asf adas asdsa asdas adsad adsadda
-daskd adsasd adsadads
-adsnad adsdasfafsnqw qwewdasf
-
-asdad awjdnas qdq 
-dfsaf ujhj
+program () {
+    declare x1 : integer ;
+    declare y1 : boolean ;
+}
