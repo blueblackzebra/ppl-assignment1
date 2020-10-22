@@ -364,6 +364,9 @@ void pushRule(struct Node * n, stackNode ** s){
         n=n->next;
         stackNode * temp;
         
+        if (!strcmp(n->piece,"epsilon")){
+            break;
+        }
         if ((n->piece)[0]=='<'){
             temp=makestackNode(n->piece,0);
         }
