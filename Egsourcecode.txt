@@ -1,4 +1,3 @@
 program () {
     declare x1 : integer ;
-    declare y1 : boolean ;
 }

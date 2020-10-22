@@ -106,7 +106,7 @@ typedef struct {
     struct Node ** rules;
 } grammar;
 
-char filename[]="Eggrammar.txt";
+char filename[]="grammar.txt";
 
 void traverseG(grammar * G){
     struct Node ** p=G->rules;
@@ -417,11 +417,11 @@ int genTree(stackNode ** s, tokenStream ** ts, grammar * G){
         return 1;
     }
 
-    for (int i=0;i<13;i++){
+    for (int i=0;i<60;i++){
         struct Node * iterRule=(G->rules)[i];
         stackNode * iterStack=top(s);
         if (!strcmp(iterRule->piece,iterStack->data)){
-            printf("Rule number selected is %d\n",i);
+            printf("Rule number selected is %d\n",i+1);
             printf("Token pos is %s\n",(*ts)->token);
             stackNode * s2=makecopy(s);
             tokenStream * ts2=(*ts); 
