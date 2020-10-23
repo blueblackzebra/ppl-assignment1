@@ -1,5 +1,4 @@
 program () {
-    declare x1 : integer ;
-    declare x2 : integer ;
+    declare list of variables x1 x2 : integer ;
     x1 = x1 + x2 ;
 }

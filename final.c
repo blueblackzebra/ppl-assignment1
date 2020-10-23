@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+
+
 /* ParseTree module */
 
 typedef union{
@@ -269,7 +271,7 @@ struct Symbol{
 
 typedef struct Symbol tokenStream;
 
-char sourcename[]="Eggsourcecode.txt";
+char sourcename[]="Egsourcecode.txt";
 
 void traverseS(tokenStream * s){
     printf("\nTraversal begins\n");
@@ -488,6 +490,37 @@ int terminalMatch(stackNode ** s,tokenStream ** ts){
     return 1;
 }
 
+void printLevelTree(stackNode ** first, stackNode ** second){
+
+    while (!isempty(first)){
+        stackNode * temp3=top(first);
+        pop(first);
+        temp3->next=NULL;
+        push(second,temp3);
+    }
+
+    if (isempty(second)){
+        return;
+    }
+
+    while (!isempty(second)){
+        // Read node
+        // Push to first
+        stackNode * temp=top(second);
+        pop(second);
+        temp->next=NULL;
+        printf("%s ",temp->treeptr->nodename);
+        
+        for(int i=0;i<temp->treeptr->child_count;i++){
+            stackNode * temp2=makestackNode(NULL,-1,temp->treeptr->children[i]);
+            push(first,temp2);
+        }
+    }
+    printf("\n");
+
+    printLevelTree(first,second);
+}
+
 int genTree(parseTree* root,stackNode ** s, tokenStream ** ts, grammar * G){
     int check=terminalMatch(s,ts);
     if (!check){
@@ -496,6 +529,7 @@ int genTree(parseTree* root,stackNode ** s, tokenStream ** ts, grammar * G){
 
     if (isempty(s)){
         return 1;
+        
     }
 
     for (int i=0;i<60;i++){
@@ -504,9 +538,16 @@ int genTree(parseTree* root,stackNode ** s, tokenStream ** ts, grammar * G){
         if (!strcmp(iterRule->piece,iterStack->data)){
             printf("Rule number selected is %d\n",i+1);
             printf("Token pos is %s\n",(*ts)->token);
-            printf("current tree is: ");
+            printf("current tree is: \n");
             printTree(root);
-            printf("\n");
+            printf("\nLevel tree is \n");
+            stackNode * first=NULL;
+            stackNode * second=NULL;
+            stackNode * x=makestackNode(NULL,-1,root);
+            push(&first,x);
+            printLevelTree(&first,&second);
+            printf("Tree end\n\n");
+
 
             parseTree* root2 = makeTreeCopy(root);
             stackNode * s2=makecopy(s);
@@ -531,6 +572,8 @@ void createParseTree(stackNode ** s,tokenStream ** ts){
     // generate tree
 }
 
+
+
 int main(){
     
     stackNode * s=NULL;
@@ -551,6 +594,7 @@ int main(){
     int value=genTree(root,&s,&stream,temp);
     printf("%d\n",value);
 
+    
     
     // getToken("{");
 
