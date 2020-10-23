@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-
+typedef struct eachVariable;
 
 /* ParseTree module */
 
@@ -25,7 +25,7 @@ typedef struct parseTree{
     int gramRule;
     int line_num;
     int depth;
-
+    struct eachVariable typeExpression;
     struct parseTree * copy;  // for making tree copy and link it to new stack
 }parseTree;
 
@@ -38,7 +38,7 @@ parseTree * makenode(char * str,int terminal, char * lex, int grule, int num, in
     temp->children=(parseTree**)malloc(sizeof(parseTree*)*50); //no node will have more than 50 children
     temp->child_count=0;
     temp->copy=NULL;
-    temp->lexeme=(char *)malloc(50*sizeof(char));
+    temp->lexeme=(char *)malloc(21*sizeof(char));
     strcpy(temp->lexeme,lex);
     temp->gramRule=grule;
     temp->line_num=num;
@@ -589,7 +589,90 @@ void createParseTree(stackNode ** s,tokenStream ** ts){
     // generate tree
 }
 
+enum primitiveType {INTEGER=1,REAL=2,BOOLEAN=3};
 
+typedef struct primitiveTypeExpression{
+    enum primitiveType type;
+};
+
+typedef struct recArrTypeExpression{
+    int dimensions;
+    int **ranges;
+};
+
+typedef struct jaggedArrTypeExpression{
+    int dimensions;
+    int ranges_R1[2];
+    int *ranges_R2;
+    int **ranges_R3;
+};
+
+typedef union typeExpressionUnion{
+        struct primitiveTypeExpression p;
+        struct recArrTypeExpression r;
+        struct jaggedArrTypeExpression j;
+};
+
+typedef struct eachVariable{
+    char var_name[20];
+    int field2;
+    int isDynamic; // -1 means "not_applicable", 0 means static, 1 means dynamic
+    union typeExpressionUnion typeExpression;
+};
+
+void traverseDeclStmt(parseTree *root, struct eachVariable* typeExpressionTable, int *sizeTypeExpTable){
+    struct parseTree* single_decl = root->children[0]->children[0];
+    if(!strcmp(single_decl->nodename, "<single_decl>")){
+        struct parseTree* single_line = single_decl->children[0];
+        if(!strcmp(single_line->nodename, "<single_prim>")){
+            typeExpressionTable = realloc(typeExpressionTable, sizeof(typeExpressionTable)*(*sizeTypeExpTable+1));
+            strcpy(typeExpressionTable[*sizeTypeExpTable].var_name, single_line->children[0]->children[2]->lexeme);
+            typeExpressionTable[*sizeTypeExpTable].field2 = 0;
+            typeExpressionTable[*sizeTypeExpTable].isDynamic = -1;
+            struct primitiveTypeExpression p;
+            char *temp = single_line->children[0]->children[3]->lexeme;
+            if(!strcmp(temp, "integer")){
+                p.type = INTEGER;
+            }   else if(!strcmp(temp, "real")){
+                p.type = REAL;
+            }   else{
+                p.type = BOOLEAN;
+            }
+            typeExpressionTable[*sizeTypeExpTable].typeExpression.p = p;
+
+            *sizeTypeExpTable++;
+        }   else if(!strcmp(single_line->nodename, "<single_rarr>")){
+
+        }   else if(!strcmp(single_line->nodename, "<single_jarr2d>")){
+
+        }   else{
+
+        }
+    }
+
+    if(root->child_count==2){
+        traverseDeclStmt(root->children[1], typeExpressionTable, *sizeTypeExpTable);
+    }
+}
+
+void traverseAssgmtStmt(parseTree *root, struct eachVariable* typeExpressionTable, int *sizeTypeExpTable){
+
+}
+
+void traverseParseTree(parseTree *root, struct eachVariable* typeExpressionTable, int *sizeTypeExpTable){
+    // if(strcmp(root->nodename, "<main_program>")){
+    // for(int i=0; i<root->child_count; ++i){
+        // if(strcmp(root->children[i]->nodename), "<decl_stmts>"){
+    traverseDeclStmt(root->children[3], typeExpressionTable, *sizeTypeExpTable);
+        // }
+    // }
+    // for(int i=0; i<root->child_count; ++i){
+        // if(strcmp(root->children[i]->nodename), "<assgmt_stmts>"){
+    traverseAssgmtStmt(root->children[4], typeExpressionTable, *sizeTypeExpTable);
+        // }
+    // }
+    // }
+}
 
 int main(){
     
@@ -611,8 +694,10 @@ int main(){
     int value=genTree(root,&s,&stream,temp);
     printf("%d\n",value);
 
-    
-    
+    struct eachVariable* typeExpressionTable;
+    int *sizeTypeExpTable=(int*)malloc(sizeof(int));
+    *sizeTypeExpTable=0;
+    traverseParseTree(root, typeExpressionTable, sizeTypeExpTable);
     // getToken("{");
 
 
