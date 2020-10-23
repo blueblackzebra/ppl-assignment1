@@ -523,6 +523,17 @@ void printLevelTree(stackNode ** first, stackNode ** second){
 
 int genTree(parseTree* root,stackNode ** s, tokenStream ** ts, grammar * G){
     int check=terminalMatch(s,ts);
+
+    printf("current tree is: \n");
+    printTree(root);
+    printf("\nLevel tree is \n");
+    stackNode * first=NULL;
+    stackNode * second=NULL;
+    stackNode * x=makestackNode(NULL,-1,root);
+    push(&first,x);
+    printLevelTree(&first,&second);
+    printf("Tree end\n\n");
+
     if (!check){
         return 0;
     }
@@ -538,15 +549,7 @@ int genTree(parseTree* root,stackNode ** s, tokenStream ** ts, grammar * G){
         if (!strcmp(iterRule->piece,iterStack->data)){
             printf("Rule number selected is %d\n",i+1);
             printf("Token pos is %s\n",(*ts)->token);
-            printf("current tree is: \n");
-            printTree(root);
-            printf("\nLevel tree is \n");
-            stackNode * first=NULL;
-            stackNode * second=NULL;
-            stackNode * x=makestackNode(NULL,-1,root);
-            push(&first,x);
-            printLevelTree(&first,&second);
-            printf("Tree end\n\n");
+            
 
 
             parseTree* root2 = makeTreeCopy(root);
