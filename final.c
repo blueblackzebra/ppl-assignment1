@@ -365,7 +365,7 @@ char * getToken(char * lex){
     else if(!strcmp(lex,"R1")){
         tok="R1";
     }
-    else if(lex[0]>=48 && lex[0]<57){
+    else if(lex[0]>=48 && lex[0]<=57){
         tok="STATIC_CNST";
     }
     else {
