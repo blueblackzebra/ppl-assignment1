@@ -21,24 +21,33 @@ typedef struct parseTree{
 
     struct parseTree ** children;
     int child_count;
+    char * lexeme;
+    int gramRule;
+    int line_num;
+    int depth;
 
     struct parseTree * copy;  // for making tree copy and link it to new stack
 }parseTree;
 
 // Parse tree functions
 
-parseTree * makenode(char * str,int terminal){
+parseTree * makenode(char * str,int terminal, char * lex, int grule, int num, int d){
     parseTree * temp=(parseTree *)malloc(sizeof(parseTree));
     temp->nodename=str;
     temp->is_terminal=terminal;
     temp->children=(parseTree**)malloc(sizeof(parseTree*)*50); //no node will have more than 50 children
     temp->child_count=0;
     temp->copy=NULL;
+    temp->lexeme=(char *)malloc(50*sizeof(char));
+    strcpy(temp->lexeme,lex);
+    temp->gramRule=grule;
+    temp->line_num=num;
+    temp->depth=d;
     //add type expression here;
 }
 
-parseTree * insert(parseTree* node,char* str,int terminal){
-    parseTree* temp=makenode(str,terminal);
+parseTree * insert(parseTree* node,char* str,int terminal, char * lex, int grule, int num, int d){
+    parseTree* temp=makenode(str,terminal,lex,grule,num,d);
     node->children[node->child_count]=temp;
     node->child_count++;
     return temp;
@@ -62,7 +71,7 @@ parseTree * makeTreeCopy(parseTree* t){
     if(t==NULL){
         return NULL;
     }
-    parseTree * res = makenode(t->nodename,t->is_terminal);
+    parseTree * res = makenode(t->nodename,t->is_terminal,t->lexeme,t->gramRule,t->line_num,t->depth);
     res->child_count=t->child_count;
     t->copy=res; //updated copy pointer
     for(int i=0;i<t->child_count;i++){
@@ -430,7 +439,7 @@ tokenStream * tokeniseSourceCode(char * filename,tokenStream *s){
 }
 
 
-void pushRule(struct Node * n, stackNode ** s){
+void pushRule(struct Node * n, stackNode ** s, int grule){
     stackNode * non_term = top(s);
     pop(s);
     non_term->next=NULL;
@@ -442,17 +451,20 @@ void pushRule(struct Node * n, stackNode ** s){
         parseTree * tempt;
         
         if (!strcmp(n->piece,"epsilon")){
-            insert(non_term->treeptr,"epsilon",1);
+            tempt=insert(non_term->treeptr,"epsilon",1,"epsilon",grule,-1,-1);
+            tempt->depth=non_term->treeptr->depth+1;
+
             break;
         }
         if ((n->piece)[0]=='<'){
-            tempt=insert(non_term->treeptr,n->piece,0);
+            tempt=insert(non_term->treeptr,n->piece,0,"",grule,-1,-1);
             temps=makestackNode(n->piece,0,tempt);
         }
         else {
-            tempt=insert(non_term->treeptr,n->piece,1);
+            tempt=insert(non_term->treeptr,n->piece,1,"",grule,-1,-1);
             temps=makestackNode(n->piece,1,tempt);
         }
+        tempt->depth=non_term->treeptr->depth+1;
         push(&rev,temps);
         
         temps=top(&rev);
@@ -481,6 +493,8 @@ int terminalMatch(stackNode ** s,tokenStream ** ts){
         if (strcmp(temp->data,(*ts)->token)){
             return 0;
         }
+        strcpy(temp->treeptr->lexeme,(*ts)->lexeme);
+        temp->treeptr->line_num=(*ts)->line_num;
         printf("Matched is %s\n",temp->data);
         pop(s);
         temp=top(s);
@@ -509,7 +523,7 @@ void printLevelTree(stackNode ** first, stackNode ** second){
         stackNode * temp=top(second);
         pop(second);
         temp->next=NULL;
-        printf("%s ",temp->treeptr->nodename);
+        printf("%s {%d %d} ",temp->treeptr->nodename,temp->treeptr->line_num,temp->treeptr->depth);
         
         for(int i=0;i<temp->treeptr->child_count;i++){
             stackNode * temp2=makestackNode(NULL,-1,temp->treeptr->children[i]);
@@ -558,7 +572,7 @@ int genTree(parseTree* root,stackNode ** s, tokenStream ** ts, grammar * G){
 
             // Tree code here
 
-            pushRule(iterRule,&s2);
+            pushRule(iterRule,&s2,i+1);
             stackNode * aaaa =top(&s2);
             printf("%s\n",aaaa->data);
             int check2=genTree(root2,&s2,&ts2,G);
@@ -589,7 +603,7 @@ int main(){
     tokenStream * stream;
     stream=tokeniseSourceCode(sourcename,stream);
 
-    root=makenode("<main_program>",0);
+    root=makenode("<main_program>",0,"",1,-1,0);
 
     t=makestackNode("<main_program>",0,root);
     push(&s,t);
