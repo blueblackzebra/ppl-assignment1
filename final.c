@@ -11,14 +11,14 @@ typedef struct primitiveTypeExpression{
 
 typedef struct recArrTypeExpression{
     int dimensions;
-    int **ranges;
+    char *ranges;
 }recArrTypeExpression;
 
 typedef struct jaggedArrTypeExpression{
     int dimensions;
-    int ranges_R1[2];
-    int *ranges_R2;
-    int **ranges_R3;
+    char *ranges_R1;
+    char *ranges_R2;
+    // int **ranges_R3;
 }jaggedArrTypeExpression;
 
 typedef union typeExpressionUnion{
@@ -645,7 +645,7 @@ void traverseDeclStmt(parseTree *root, struct eachVariable* typeExpressionTable,
 
         }   else if(!strcmp(single_line->nodename, "<single_jarr2d>")){
 
-        }   else{
+        }   else{ // <single_jarr3d>
 
         }
     }
