@@ -39,20 +39,19 @@
 <static_cnst_list> epsilon
 <static_cnst_list> STATIC_CNST <static_cnst_list>
 <dim_jarr3d> SOB STATIC_CNST TO STATIC_CNST SCB SOB SCB SOB SCB 
-<one_assgmt> <lhs_op> ASSGN_OP <arith_expr1> SC
-<one_assgmt> <lhs_op> ASSGN_OP <bool_expr1> SC
-<arith_expr1> <arith_expr2>
-<arith_expr1> <arith_expr2> AR_OP1 <arith_expr1>
-<arith_expr2> <rhs_op>
-<arith_expr2> <rhs_op> AR_OP2 <arith_expr2>
+<one_assgmt> <lhs_op> ASSGN_OP <expr1> SC
+<expr1> <expr2>
+<expr1> <expr2> BOOL_AND <expr1>
+<expr2> <expr3>
+<expr2> <expr3> BOOL_OR <expr2>
+<expr3> <expr4>
+<expr3> <expr4> AR_OP1 <expr3>
+<expr4> <rhs_op>
+<expr4> <rhs_op> AR_OP2 <expr4>
 <rhs_op> <index_>
 <rhs_op> <array_elem>
 <lhs_op> VAR_NAME
 <lhs_op> <array_elem>
-<bool_expr1> <bool_expr2>
-<bool_expr1> <bool_expr2> BOOL_AND <bool_expr1>
-<bool_expr2> <rhs_op>
-<bool_expr2> <rhs_op> BOOL_OR <bool_expr2>
 <array_elem> VAR_NAME SOB <index_> <index_list> SCB
 <index_> VAR_NAME
 <index_> STATIC_CNST
