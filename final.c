@@ -2,16 +2,46 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct eachVariable;
 
-/* ParseTree module */
+enum primitiveType {INTEGER=1,REAL=2,BOOLEAN=3};
 
-typedef union{
-    //insert type fields here
-    char* type;
-}Type_exp;
+typedef struct primitiveTypeExpression{
+    enum primitiveType type;
+}primitiveTypeExpression;
+
+typedef struct recArrTypeExpression{
+    int dimensions;
+    int **ranges;
+}recArrTypeExpression;
+
+typedef struct jaggedArrTypeExpression{
+    int dimensions;
+    int ranges_R1[2];
+    int *ranges_R2;
+    int **ranges_R3;
+}jaggedArrTypeExpression;
+
+typedef union typeExpressionUnion{
+        primitiveTypeExpression p;
+        recArrTypeExpression r;
+        jaggedArrTypeExpression j;
+}typeExpressionUnion;
+
+typedef struct eachVariable{
+    char var_name[21];
+    int field2; //prim, recArr, or jaggedArr
+    int isDynamic; // -1 means "not_applicable", 0 means static, 1 means dynamic
+    typeExpressionUnion typeExpression;
+}eachVariable;
+
+// typedef union{
+//     //insert type fields here
+//     char* type;
+// }Type_exp;
 
 // Parse tree stucture
+
+/* ParseTree module */
 
 typedef struct parseTree{
     char* nodename;
@@ -557,7 +587,7 @@ int genTree(parseTree* root,stackNode ** s, tokenStream ** ts, grammar * G){
         
     }
 
-    for (int i=0;i<60;i++){
+    for (int i=0;i<59;i++){
         struct Node * iterRule=(G->rules)[i];
         stackNode * iterStack=top(s);
         if (!strcmp(iterRule->piece,iterStack->data)){
@@ -589,36 +619,6 @@ void createParseTree(stackNode ** s,tokenStream ** ts){
     // generate tree
 }
 
-enum primitiveType {INTEGER=1,REAL=2,BOOLEAN=3};
-
-typedef struct primitiveTypeExpression{
-    enum primitiveType type;
-};
-
-typedef struct recArrTypeExpression{
-    int dimensions;
-    int **ranges;
-};
-
-typedef struct jaggedArrTypeExpression{
-    int dimensions;
-    int ranges_R1[2];
-    int *ranges_R2;
-    int **ranges_R3;
-};
-
-typedef union typeExpressionUnion{
-        struct primitiveTypeExpression p;
-        struct recArrTypeExpression r;
-        struct jaggedArrTypeExpression j;
-};
-
-typedef struct eachVariable{
-    char var_name[20];
-    int field2;
-    int isDynamic; // -1 means "not_applicable", 0 means static, 1 means dynamic
-    union typeExpressionUnion typeExpression;
-};
 
 void traverseDeclStmt(parseTree *root, struct eachVariable* typeExpressionTable, int *sizeTypeExpTable){
     struct parseTree* single_decl = root->children[0]->children[0];
@@ -651,7 +651,7 @@ void traverseDeclStmt(parseTree *root, struct eachVariable* typeExpressionTable,
     }
 
     if(root->child_count==2){
-        traverseDeclStmt(root->children[1], typeExpressionTable, *sizeTypeExpTable);
+        traverseDeclStmt(root->children[1], typeExpressionTable, sizeTypeExpTable);
     }
 }
 
@@ -663,12 +663,12 @@ void traverseParseTree(parseTree *root, struct eachVariable* typeExpressionTable
     // if(strcmp(root->nodename, "<main_program>")){
     // for(int i=0; i<root->child_count; ++i){
         // if(strcmp(root->children[i]->nodename), "<decl_stmts>"){
-    traverseDeclStmt(root->children[3], typeExpressionTable, *sizeTypeExpTable);
+    traverseDeclStmt(root->children[3], typeExpressionTable, sizeTypeExpTable);
         // }
     // }
     // for(int i=0; i<root->child_count; ++i){
         // if(strcmp(root->children[i]->nodename), "<assgmt_stmts>"){
-    traverseAssgmtStmt(root->children[4], typeExpressionTable, *sizeTypeExpTable);
+    traverseAssgmtStmt(root->children[4], typeExpressionTable, sizeTypeExpTable);
         // }
     // }
     // }
@@ -697,7 +697,7 @@ int main(){
     struct eachVariable* typeExpressionTable;
     int *sizeTypeExpTable=(int*)malloc(sizeof(int));
     *sizeTypeExpTable=0;
-    traverseParseTree(root, typeExpressionTable, sizeTypeExpTable);
+   // traverseParseTree(root, typeExpressionTable, sizeTypeExpTable);
     // getToken("{");
 
 
