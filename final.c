@@ -34,6 +34,18 @@ typedef struct eachVariable{
     typeExpressionUnion typeExpression;
 }eachVariable;
 
+typedef struct error{
+    int lineNumber;
+    char stmt_type; // 0 for decl, 1 for assign
+    char operator;
+    // lexemes obtained through eachVariable
+    eachVariable type_first_operand;
+    eachVariable type_second_operand;
+    int depth;
+    char message[31];
+}error;
+
+
 // typedef union{
 //     //insert type fields here
 //     char* type;
