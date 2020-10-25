@@ -11,14 +11,14 @@ typedef struct primitiveTypeExpression{
 
 typedef struct recArrTypeExpression{
     int dimensions;
-    int **ranges;
+    char *ranges;
 }recArrTypeExpression;
 
 typedef struct jaggedArrTypeExpression{
     int dimensions;
-    int ranges_R1[2];
-    int *ranges_R2;
-    int **ranges_R3;
+    char *ranges_R1;
+    char *ranges_R2;
+    // int **ranges_R3;
 }jaggedArrTypeExpression;
 
 typedef union typeExpressionUnion{
@@ -33,6 +33,18 @@ typedef struct eachVariable{
     int isDynamic; // -1 means "not_applicable", 0 means static, 1 means dynamic
     typeExpressionUnion typeExpression;
 }eachVariable;
+
+typedef struct error{
+    int lineNumber;
+    char stmt_type; // 0 for decl, 1 for assign
+    char operator;
+    // lexemes obtained through eachVariable
+    eachVariable type_first_operand;
+    eachVariable type_second_operand;
+    int depth;
+    char message[31];
+}error;
+
 
 // typedef union{
 //     //insert type fields here
@@ -632,7 +644,7 @@ void traverseDeclStmt(parseTree *root, struct eachVariable* typeExpressionTable,
 
         }   else if(!strcmp(single_line->nodename, "<single_jarr2d>")){
 
-        }   else{
+        }   else{ // <single_jarr3d>
 
         }
     }
