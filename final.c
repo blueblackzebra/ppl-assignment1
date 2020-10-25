@@ -111,6 +111,7 @@ parseTree * makeTreeCopy(parseTree* t){
     return res;
 }
 
+
 /* Stack module */
 
 typedef struct stackNode{
@@ -224,16 +225,13 @@ void traverseG(grammar * G){
     struct Node ** p=G->rules;
 
     int i=0;
-    // printf("Start\n");
 
     while (p[i]){
         struct Node * n=p[i];
-        // printf("%d\n",i);
         printf("%s\n",n->piece);
         while (n->next){
             n=n->next;
             printf("%s\n",n->piece);
-            // printf("%p\n",(void *) n->piece);
             
 
         }
@@ -263,9 +261,7 @@ grammar * readGrammar(char * filename){
             line[strlen(line)-1]='\0';
 
         }
-        // temp[count]=(Node *)malloc(sizeof(Node));
         struct Node * trav=(struct Node *)malloc(sizeof(struct Node));
-        // printf("Address allocated to trav at %p\n",(void *) trav);
         G->rules[count]=trav;
 
         char * tempStr;
@@ -289,7 +285,6 @@ grammar * readGrammar(char * filename){
             tempStr=strtok(NULL," ");
         }
 
-        // free(trav->next);
         trav->next=NULL;
         
         count++;
@@ -429,7 +424,6 @@ tokenStream * tokeniseSourceCode(char * filename,tokenStream *s){
         if (!check){
             break;
         }
-        // printf("%s\n",line);
         if (line[strlen(line)-1]=='\n'){
             line[strlen(line)-1]='\0';
 
@@ -438,7 +432,6 @@ tokenStream * tokeniseSourceCode(char * filename,tokenStream *s){
         char * tempStr;
         tempStr=strtok(line," ");
 
-        // printf("%s\n",tempStr);
 
         while (tempStr){
             s->line_num=count;
@@ -454,13 +447,13 @@ tokenStream * tokeniseSourceCode(char * filename,tokenStream *s){
         }
 
         count++;
-        // printf("%d\n",count);
+        
     }
     s=ret;
 
-    // Check
+    
     while (s->next->line_num<count && s->next->line_num>0){
-        // printf("%d\n",s->next->line_num);
+
         s=s->next;
     }
     s->next=NULL;
@@ -498,18 +491,14 @@ void pushRule(struct Node * n, stackNode ** s, int grule){
         push(&rev,temps);
         
         temps=top(&rev);
-        // printf("%s\n",temp->data);
         
 
     }
-    // printf("%d\n",isempty(&rev));
     int count=0;
     while (!isempty(&rev)){
         
         stackNode * temp=top(&rev);
-        // printf("%s\n",temp->data);
         stackNode * temp2=top(s);
-        // printf("S is %s\n",temp2->data);
         pop(&rev);
         temp->next=NULL;
         push(s,temp);
@@ -525,7 +514,7 @@ int terminalMatch(stackNode ** s,tokenStream ** ts){
         }
         strcpy(temp->treeptr->lexeme,(*ts)->lexeme);
         temp->treeptr->line_num=(*ts)->line_num;
-        printf("Matched is %s\n",temp->data);
+        // printf("Matched is %s\n",temp->data);
         pop(s);
         temp=top(s);
         (*ts)=(*ts)->next;
@@ -565,34 +554,24 @@ void printLevelTree(stackNode ** first, stackNode ** second){
     printLevelTree(first,second);
 }
 
-int genTree(parseTree* root,stackNode ** s, tokenStream ** ts, grammar * G){
+parseTree * genTree(parseTree* root,stackNode ** s, tokenStream ** ts, grammar * G){
     int check=terminalMatch(s,ts);
 
-    printf("current tree is: \n");
-    printTree(root);
-    printf("\nLevel tree is \n");
-    stackNode * first=NULL;
-    stackNode * second=NULL;
-    stackNode * x=makestackNode(NULL,-1,root);
-    push(&first,x);
-    printLevelTree(&first,&second);
-    printf("Tree end\n\n");
-
+    
     if (!check){
-        return 0;
+        return NULL;
     }
 
     if (isempty(s)){
-        return 1;
-        
+        return root;
     }
 
     for (int i=0;i<59;i++){
         struct Node * iterRule=(G->rules)[i];
         stackNode * iterStack=top(s);
         if (!strcmp(iterRule->piece,iterStack->data)){
-            printf("Rule number selected is %d\n",i+1);
-            printf("Token pos is %s\n",(*ts)->token);
+            // printf("Rule number selected is %d\n",i+1);
+            // printf("Token pos is %s\n",(*ts)->token);
             
 
 
@@ -605,18 +584,26 @@ int genTree(parseTree* root,stackNode ** s, tokenStream ** ts, grammar * G){
             pushRule(iterRule,&s2,i+1);
             stackNode * aaaa =top(&s2);
             printf("%s\n",aaaa->data);
-            int check2=genTree(root2,&s2,&ts2,G);
+            parseTree * check2=genTree(root2,&s2,&ts2,G);
             if (check2){
-                return 1;
+                return check2;
             }
         }
     }
 
-    return 0;
+    return NULL;
 }
 
-void createParseTree(stackNode ** s,tokenStream ** ts){
-    // generate tree
+parseTree * createParseTree(parseTree * root,tokenStream * ts, grammar * G){
+    stackNode * s=NULL;
+    stackNode * t=NULL;
+    t=makestackNode("<main_program>",0,root);
+    push(&s,t);
+
+    parseTree * value=genTree(root,&s,&ts,G);
+
+    return value;
+
 }
 
 
@@ -676,8 +663,7 @@ void traverseParseTree(parseTree *root, struct eachVariable* typeExpressionTable
 
 int main(){
     
-    stackNode * s=NULL;
-    stackNode * t=NULL;
+    
     parseTree * root=NULL;
     
     grammar * temp;
@@ -688,64 +674,32 @@ int main(){
 
     root=makenode("<main_program>",0,"",1,-1,0);
 
-    t=makestackNode("<main_program>",0,root);
-    push(&s,t);
+    parseTree * value=createParseTree(root,stream,temp);
 
-    int value=genTree(root,&s,&stream,temp);
-    printf("%d\n",value);
+    // printf("current tree is: \n");
+    // printTree(value);
+    printf("\nLevel tree is \n");
+    stackNode * first=NULL;
+    stackNode * second=NULL;
+    stackNode * x=makestackNode(NULL,-1,value);
+    push(&first,x);
+    printLevelTree(&first,&second);
+    printf("Tree end\n\n");
+
+    if (value){
+        printf("1\n");
+    }
+    else {
+        printf("0\n");
+    }
+    
+    
 
     struct eachVariable* typeExpressionTable;
     int *sizeTypeExpTable=(int*)malloc(sizeof(int));
     *sizeTypeExpTable=0;
    // traverseParseTree(root, typeExpressionTable, sizeTypeExpTable);
     // getToken("{");
-
-
-    // t=top(&s);
-    // printf("%s\n",t->data);
-
-    // pushRule((temp->rules)[0],&s);
-
-    // t=top(&s);
-    // printf("%s\n",t->data);
-    
-
-    
-    // // printf("gsdgsd\n");
-
-    // printf("Lexeme is %s\n",stream->lexeme);
-
-    // t=top(&s);
-    // printf("top is %s\n",t->data);
-
-
-    // terminalMatch(&s,&stream);
-
-    // printf("Lexeme is %s\n",stream->lexeme);
-
-    // t=top(&s);
-    // printf("top is %s\n",t->data);
-
-
-
-   
-    // stackNode* s2 =makecopy(&s);
-    
-    // stackNode * a =top(&s);
-    
-    // printf("%s\n",a->data);
-    // pop(&s);
-    // a =top(&s);
-    
-    // printf("%s\n",a->data);   
-
-    // a =top(&s2);
-    
-    // printf("%s\n",a->data);
-    // pop(&s2);
-    // a =top(&s2);
-    
-    // printf("%s\n",a->data);
 
 
     return 0;
