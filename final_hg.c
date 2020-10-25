@@ -340,7 +340,7 @@ struct Symbol{
 
 typedef struct Symbol tokenStream;
 
-char sourcename[]="Egsourcecode.txt";
+char sourcename[]="Egsourcecode_hg.txt";
 
 void traverseS(tokenStream * s){
     printf("\nTraversal begins\n");
@@ -644,11 +644,13 @@ parseTree * createParseTree(parseTree * root,tokenStream * ts, grammar * G){
 
 }
 void printTypeExp(eachVariable *typeExpressionTable, int sizeTypeExpTable);
-void pushTypeTable(eachVariable *typeExpressionTable, int *sizeTypeExpTable, eachVariable t){
+eachVariable* pushTypeTable(eachVariable *typeExpressionTable, int *sizeTypeExpTable, eachVariable t){
+    printf("\nI WAS CALLED %d %s\n", *sizeTypeExpTable, t.var_name);
     typeExpressionTable = (eachVariable*)realloc(typeExpressionTable, sizeof(eachVariable)*(*sizeTypeExpTable+1));
     typeExpressionTable[*sizeTypeExpTable] = t;
     (*sizeTypeExpTable)++;
-    // printTypeExp(typeExpressionTable, *sizeTypeExpTable);
+    printTypeExp(typeExpressionTable, *sizeTypeExpTable);
+    return typeExpressionTable;
 }
 
 eachVariable singlePrim(parseTree *root, eachVariable *typeExpressionTable, int *sizeTypeExpTable) {
@@ -673,28 +675,33 @@ eachVariable singlePrim(parseTree *root, eachVariable *typeExpressionTable, int 
             break;
     }
     root->children[1]->typeExpression = t;
-    pushTypeTable(typeExpressionTable, sizeTypeExpTable, t);
+    typeExpressionTable = pushTypeTable(typeExpressionTable, sizeTypeExpTable, t);
     return t;
 }
 
-int dimrarr(parseTree *root, char *ranges, int *dim){
+char *dimrarr(parseTree *root, char *ranges, int *dim, int *dyn){
     char *lval = root->children[0]->children[1]->children[0]->lexeme;
     char *rval = root->children[0]->children[3]->children[0]->lexeme;
-    int dyn=0;
+    *dyn=0;
     if(!(lval[0]>=48 && lval[0]<=57 && rval[0]>=48 && rval[0]<=57)){
-        dyn=1;
+        *dyn=1;
     }
+
     // strcat(ranges, "[");
+    // printf("\nHEH %x\n", &ranges);
+    if(ranges!=NULL) ranges = (char*) realloc(ranges, sizeof(char)*(strlen(ranges)+strlen(lval)+strlen(rval)+1));
+    else ranges = (char*) realloc(ranges, sizeof(char)*(0+strlen(lval)+strlen(rval)+1));
     strcat(ranges, lval);
-    // strcat(ranges, ",");
+    // strcat(ranges, ' ');
+    strcat(ranges, ",");
     strcat(ranges, rval);
+    strcat(ranges, ";");
     // strcat(ranges, "]");
     (*dim)++;
     if(root->child_count==2){
-        dyn+=dimrarr(root->children[1], ranges, dim);
+        dimrarr(root->children[1], ranges, dim, dyn);
     }
-    if(dyn>0) return 1;
-    else return 0;
+    return ranges;
 }
 
 eachVariable singleRarr(parseTree *root, eachVariable *typeExpressionTable, int *sizeTypeExpTable) {
@@ -702,14 +709,16 @@ eachVariable singleRarr(parseTree *root, eachVariable *typeExpressionTable, int 
     strcpy(t.var_name, root->children[1]->lexeme);
     t.field2 = 1;
     t.typeExpression.r.ranges = "";
-    char *ranges;
-    ranges="";
+    char *ranges = NULL;
     int *dim = (int*)malloc(sizeof(int));
     *dim=0;
-    t.isDynamic = dimrarr(root->children[4], ranges, dim);
+    int *dyn = (int*)malloc(sizeof(int));
+    *dyn=0;
+    ranges = dimrarr(root->children[4], ranges, dim, dyn);
+    t.isDynamic = *dyn;
     strcat(t.typeExpression.r.ranges, ranges);
     t.typeExpression.r.dimensions = *dim;
-    pushTypeTable(typeExpressionTable, sizeTypeExpTable, t);
+    typeExpressionTable = pushTypeTable(typeExpressionTable, sizeTypeExpTable, t);
     return t;
 }
 
@@ -723,12 +732,12 @@ eachVariable singleDecl(parseTree *root, eachVariable *typeExpressionTable, int 
 }
 
 void varList(parseTree *root, eachVariable *typeExpressionTable, int *sizeTypeExpTable, eachVariable t){
-    if(!strcpy(root->children[0]->nodename, "epsilon")){
+    if(!strcmp(root->children[0]->nodename, "epsilon")){
         return;
     }
     strcpy(t.var_name, root->children[0]->lexeme);
     root->children[0]->typeExpression = t;
-    pushTypeTable(typeExpressionTable, sizeTypeExpTable, t);
+    typeExpressionTable = pushTypeTable(typeExpressionTable, sizeTypeExpTable, t);
     varList(root->children[1], typeExpressionTable, sizeTypeExpTable, t);
 }
 
@@ -754,10 +763,10 @@ eachVariable listPrim(parseTree *root, eachVariable *typeExpressionTable, int *s
     }
     strcpy(t.var_name, root->children[4]->lexeme);
     root->children[4]->typeExpression = t;
-    pushTypeTable(typeExpressionTable, sizeTypeExpTable, t);
+    typeExpressionTable = pushTypeTable(typeExpressionTable, sizeTypeExpTable, t);
     strcpy(t.var_name, root->children[5]->lexeme);
     root->children[5]->typeExpression = t;
-    pushTypeTable(typeExpressionTable, sizeTypeExpTable, t);
+    typeExpressionTable = pushTypeTable(typeExpressionTable, sizeTypeExpTable, t);
     // printf("\nI WAS CALLEDHEHE%s\n", root->children[5]->lexeme);
     varList(root->children[6], typeExpressionTable, sizeTypeExpTable, t);
     return t;
@@ -766,19 +775,24 @@ eachVariable listPrim(parseTree *root, eachVariable *typeExpressionTable, int *s
 eachVariable listRarr(parseTree *root, eachVariable *typeExpressionTable, int *sizeTypeExpTable) {
     eachVariable t;
     t.field2 = 1;
-    char *ranges;
-    ranges = "";
+    char *ranges = NULL;
     int *dim = (int*)malloc(sizeof(int));
     *dim=0;
-    t.isDynamic = dimrarr(root->children[9], ranges, dim);
+    int *dyn = (int*)malloc(sizeof(int));
+    *dyn=0;
+    ranges = dimrarr(root->children[9], ranges, dim, dyn);
+    t.isDynamic = *dyn;
+    // printf("\nHEH %x\n", ranges);
+    // printf("\nI WAS CALLED %d\n", sizeof(char)*(strlen(ranges)));
     t.typeExpression.r.dimensions = *dim;
+    t.typeExpression.r.ranges = (char*)malloc(sizeof(ranges));
     strcat(t.typeExpression.r.ranges, ranges);
     strcpy(t.var_name, root->children[4]->lexeme);
     root->children[4]->typeExpression = t;
-    pushTypeTable(typeExpressionTable, sizeTypeExpTable, t);
+    typeExpressionTable = pushTypeTable(typeExpressionTable, sizeTypeExpTable, t);
     strcpy(t.var_name, root->children[5]->lexeme);
     root->children[5]->typeExpression = t;
-    pushTypeTable(typeExpressionTable, sizeTypeExpTable, t);
+    typeExpressionTable = pushTypeTable(typeExpressionTable, sizeTypeExpTable, t);
     varList(root->children[6], typeExpressionTable, sizeTypeExpTable, t);
     return t;
 }
@@ -819,8 +833,10 @@ void traverseParseTree(parseTree *root, eachVariable* typeExpressionTable, int *
 }
 
 void printTypeExp(eachVariable *typeExpressionTable, int sizeTypeExpTable) {
+    
     for (int i = 0; i < sizeTypeExpTable; ++i) {
         eachVariable t = typeExpressionTable[i];
+        printf("\nHEH %d\n", i);
         printf("Variable name: %s,", t.var_name);
         printf("\t");
         switch (t.isDynamic) {
@@ -874,7 +890,7 @@ int main(){
     stackNode * second=NULL;
     stackNode * x=makestackNode(NULL,-1,value);
     push(&first,x);
-    printLevelTree(&first,&second);
+    // printLevelTree(&first,&second);
     printf("Tree end\n\n");
 
     if (value){
