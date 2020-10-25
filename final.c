@@ -72,6 +72,338 @@ typedef struct parseTree{
     struct parseTree * copy;  // for making tree copy and link it to new stack
 }parseTree;
 
+
+
+int staticListCount(parseTree* static_cnst_list,int *line_num)
+{
+    int line = static_cnst_list->children[0]->line_num;
+    if(line!=-1) *line_num=line;
+
+    if(!strcmp(static_cnst_list->children[0]->nodename,"epsilon"))
+    {
+        return 0;
+    }
+    return 1+staticListCount(static_cnst_list->children[1],line_num);
+}
+
+eachVariable chkJagged2d(parseTree *dim_jarr2d,parseTree *ranges_desc)
+{
+    eachVariable retVal;
+    retVal.field2 = 2;
+    retVal.isDynamic = -1;
+    jaggedArrTypeExpression j;
+    j.dimensions = 2;
+    int dim1 = atoi(dim_jarr2d->children[1]->lexeme);
+    int dim2 = atoi(dim_jarr2d->children[3]->lexeme);
+    int numRows = dim2-dim1+1;
+
+    //populating R1 in typeExpr
+    j.ranges_R1 = (char*) malloc(sizeof(dim_jarr2d->children[1]->lexeme)+sizeof(dim_jarr2d->children[3]->lexeme)+sizeof(char));
+    strcat(j.ranges_R1,dim_jarr2d->children[1]->lexeme);
+    strcat(j.ranges_R1," ");
+    strcat(j.ranges_R1,dim_jarr2d->children[3]->lexeme);
+
+    int rowSize,rowsYet=0;
+    int rowSizeYet;
+    int errFlag=0;
+    parseTree *tempRange = ranges_desc,*tempOne,*tempDimVal;
+    int line_num,temp_line_num;
+    int sizeR2=0;
+    j.ranges_R2=NULL;
+    while(!strcmp(tempRange->nodename,"<ranges_desc>")) //this check isn't really required, might as well be while(1)
+    {
+        tempOne = tempRange->children[0];
+        rowSize = atoi(tempOne->children[6]->lexeme);
+        tempDimVal = tempOne->children[10];
+        line_num = tempOne->children[0]->line_num;
+
+        if(!errFlag)
+        {   
+            j.ranges_R2 = (char *) realloc(j.ranges_R2,sizeof(tempOne->children[6]->lexeme)+sizeof(char)+sizeR2);
+            sizeR2+=sizeof(tempOne->children[6]->lexeme)+sizeof(char);
+            strcat(j.ranges_R2,tempOne->children[6]->lexeme);
+            strcat(j.ranges_R2," ");
+        }
+
+        rowSizeYet=0;
+        rowsYet++;
+
+        while(strcmp(tempDimVal->children[0]->nodename,"epsilon"))
+        {
+            int tempCount = staticListCount(tempDimVal->children[0],&temp_line_num); //tempCount should ALWAYS be 1, if NOT, error
+            if(tempCount!=1) //error
+            {
+                //printf("E1\n");
+                if(!errFlag)
+                {
+                    free(j.ranges_R1);
+                    free(j.ranges_R2);
+                }
+                errFlag=1;
+                if(line_num<temp_line_num)
+                    line_num = temp_line_num;
+                retVal.field2 = -1;
+
+                printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",line_num,"Declaration",tempDimVal->depth,"2D JA dimension mismatch");
+
+                // if(tempCount)
+                //     printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",tempDimVal->line_num,"Declaration",tempDimVal->children[2]->children[0]->children[0]->depth,"2D JA dimension mismatch");
+                // else
+                //     printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",tempDimVal->line_num,"Declaration",tempDimVal->children[0]->depth,"2D JA dimension mismatch");
+            }
+
+            tempDimVal = tempDimVal->children[2];
+            rowSizeYet++;
+
+            // if(rowSizeYet>=rowSize) //error
+            // {
+            //     //printf("E2\n");
+            //     if(!errFlag)
+            //     {
+            //         free(j.ranges_R1);
+            //         free(j.ranges_R2);
+            //     }
+            //     errFlag=1;
+            //     if(line_num<temp_line_num)
+            //         line_num = temp_line_num;
+            //     retVal.field2 = -1;
+
+            //     printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",line_num,"Declaration",tempDimVal->depth,"2D JA dimension mismatch");
+
+            //     // printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",tempDimVal->line_num,"Declaration",tempDimVal->children[0]->children[0]->depth,"2D JA dimension mismatch");
+            // }
+        } //<dim_values> for ONE row traversed
+
+        if(staticListCount(tempOne->children[11],&temp_line_num)!=1) //error
+        {
+            //printf("E3\n");
+            if(!errFlag)
+            {
+                free(j.ranges_R1);
+                free(j.ranges_R2);
+            }
+            errFlag=1;
+            if(line_num<temp_line_num)
+                    line_num = temp_line_num;
+            retVal.field2 = -1;
+
+            printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",line_num,"Declaration",tempOne->depth,"2D JA dimension mismatch");
+
+            // printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",tempOne->line_num,"Declaration",tempOne->children[11]->children[0]->depth,"2D JA dimension mismatch");
+        }
+        
+        rowSizeYet++;
+
+        if(rowSizeYet!=rowSize) //error
+        {
+            //printf("E4\n");
+            if(!errFlag)
+            {
+                free(j.ranges_R1);
+                free(j.ranges_R2);
+            }
+            errFlag=1;
+            if(line_num<temp_line_num)
+                line_num = temp_line_num;
+            retVal.field2 = -1;
+            printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",line_num,"Declaration",tempOne->depth,"2D JA dimension mismatch");
+        }
+
+        if(tempRange->child_count>1&&rowsYet<=numRows)
+            tempRange = tempRange->children[1];
+        else
+            break;
+    }
+
+    if(rowsYet!=numRows) //error
+    {
+        //printf("E5\n");
+        if(!errFlag)
+        {
+            free(j.ranges_R1);
+            free(j.ranges_R2);
+        }
+        errFlag=1;
+        if(line_num<temp_line_num)
+            line_num = temp_line_num;
+        retVal.field2 = -1;
+
+        printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",line_num,"Declaration",tempRange->depth,"2D JA size mismatch");
+    }
+
+    if(errFlag) return retVal;
+    //success
+    retVal.typeExpression.j = j;
+    return retVal;
+}
+
+eachVariable chkJagged3d(parseTree *dim_jarr3d,parseTree *ranges_desc)
+{
+    eachVariable retVal;
+    retVal.field2 = 2;
+    retVal.isDynamic = -1;
+    jaggedArrTypeExpression j;
+    j.dimensions = 3;
+    int dim1 = atoi(dim_jarr3d->children[1]->lexeme);
+    int dim2 = atoi(dim_jarr3d->children[3]->lexeme);
+    int numRows = dim2-dim1+1;
+
+    //populating R1 in typeExpr
+    j.ranges_R1 = (char*) malloc(sizeof(dim_jarr3d->children[1]->lexeme)+sizeof(dim_jarr3d->children[3]->lexeme)+sizeof(char));
+    strcat(j.ranges_R1,dim_jarr3d->children[1]->lexeme);
+    strcat(j.ranges_R1," ");
+    strcat(j.ranges_R1,dim_jarr3d->children[3]->lexeme);
+
+    int rowSize,rowsYet=0,tempCount;
+    int rowSizeYet;
+    int errFlag=0;
+    int line_num,temp_line_num;
+    int sizeR2=0;
+    j.ranges_R2=NULL;
+    parseTree *tempRange = ranges_desc,*tempOne,*tempDimVal;
+    while(!strcmp(tempRange->nodename,"<ranges_desc>")) //this check isn't really required, might as well be while(1)
+    {
+        tempOne = tempRange->children[0];
+        rowSize = atoi(tempOne->children[6]->lexeme);
+        tempDimVal = tempOne->children[10];
+        line_num = tempOne->children[0]->line_num;
+
+        if(!errFlag)
+        {
+            j.ranges_R2 = (char*) realloc(j.ranges_R2,sizeof(tempOne->children[6]->lexeme)+3*sizeof(char)+sizeR2);
+            sizeR2+=sizeof(tempOne->children[6]->lexeme)+3*sizeof(char);
+            strcat(j.ranges_R2,tempOne->children[6]->lexeme);
+            strcat(j.ranges_R2," [ ");
+        }
+
+        rowSizeYet=0;
+        rowsYet++;
+
+        while(strcmp(tempDimVal->children[0]->nodename,"epsilon"))
+        {
+            tempCount = staticListCount(tempDimVal->children[0],&temp_line_num); //tempCount should NOT be zero
+            if(!tempCount) //error
+            {
+                if(!errFlag)
+                {
+                    free(j.ranges_R1);
+                    free(j.ranges_R2);
+                }
+                errFlag=1;
+                if(line_num<temp_line_num)
+                    line_num = temp_line_num;
+                retVal.field2 = -1;
+                
+                printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",line_num,"Declaration",tempDimVal->depth,"3D JA dimension mismatch");
+            }
+
+            if(!errFlag)
+            {
+                int length = snprintf( NULL, 0, "%d", tempCount);
+                char* string_TC = malloc( length + 1 );
+                snprintf(string_TC, length + 1, "%d", tempCount);
+                j.ranges_R2 = (char*) realloc(j.ranges_R2,sizeof(string_TC)+sizeof(char)+sizeR2);
+                sizeR2+=sizeof(string_TC)+sizeof(char);
+                strcat(j.ranges_R2,string_TC);
+                strcat(j.ranges_R2," ");    
+            }
+            
+
+            tempDimVal = tempDimVal->children[2];
+            rowSizeYet++;
+
+            // if(rowSizeYet>=rowSize) //error
+            // {
+            //     if(!errFlag)
+            //     {
+            //         free(j.ranges_R1);
+            //         free(j.ranges_R2);
+            //     }
+            //     errFlag=1;
+            //     if(line_num<temp_line_num)
+            //         line_num = temp_line_num;
+            //     retVal.field2 = -1;
+
+            //     printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",line_num,"Declaration",tempDimVal->depth,"3D JA dimension mismatch");
+
+            //     // printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",tempDimVal->line_num,"Declaration",tempDimVal->children[0]->children[0]->depth,"2D JA dimension mismatch");
+            // }
+        }//dim values traversed for one row
+
+        if(!(tempCount=staticListCount(tempOne->children[11],&temp_line_num))) //error
+        {
+            if(!errFlag)
+            {
+                free(j.ranges_R1);
+                free(j.ranges_R2);
+            }
+            errFlag=1;
+            if(line_num<temp_line_num)
+                line_num = temp_line_num;
+            retVal.field2 = -1;
+
+            printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",line_num,"Declaration",tempOne->depth,"3D JA dimension mismatch");
+
+            // printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",tempOne->line_num,"Declaration",tempOne->children[11]->children[0]->depth,"2D JA dimension mismatch");
+        }
+        
+        if(!errFlag)
+        {
+            int length = snprintf( NULL, 0, "%d", tempCount);
+            char* string_TC = malloc( length + 1 );
+            snprintf(string_TC, length + 1, "%d", tempCount);
+            j.ranges_R2 = (char*) realloc(j.ranges_R2,sizeof(string_TC)+3*sizeof(char)+sizeR2);
+            sizeR2+=sizeof(string_TC)+3*sizeof(char);
+            strcat(j.ranges_R2,string_TC);
+            strcat(j.ranges_R2," ] "); 
+        }
+    
+        rowSizeYet++;
+
+        if(rowSizeYet!=rowSize) //error
+        {
+            if(!errFlag)
+            {
+                free(j.ranges_R1);
+                free(j.ranges_R2);
+            }
+            errFlag=1;
+            if(line_num<temp_line_num)
+                line_num = temp_line_num;
+            retVal.field2 = -1;
+    
+            printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",line_num,"Declaration",tempOne->depth,"3D JA dimension mismatch");
+        }
+
+        if(tempRange->child_count>1&&rowsYet<=numRows)
+            tempRange = tempRange->children[1];
+        else
+            break;
+    }//one more row traversed
+
+    if(rowsYet!=numRows) //error
+    {
+        if(!errFlag)
+        {
+            free(j.ranges_R1);
+            free(j.ranges_R2);
+        }
+        errFlag=1;
+        if(line_num<temp_line_num)
+            line_num = temp_line_num;
+        retVal.field2 = -1;
+    
+        printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",line_num,"Declaration",tempRange->depth,"3D JA size mismatch");
+    }
+
+    if(retVal.field2==-1)
+        return retVal;
+    //success
+    retVal.typeExpression.j = j;
+    return retVal;
+}
+
+
 // Parse tree functions
 
 parseTree * makenode(char * str,int terminal, char * lex, int grule, int num, int d){
@@ -340,7 +672,7 @@ struct Symbol{
 
 typedef struct Symbol tokenStream;
 
-char sourcename[]="Egsourcecode.txt";
+char sourcename[]="testingJagged.txt";
 
 void traverseS(tokenStream * s){
     printf("\nTraversal begins\n");
@@ -646,38 +978,63 @@ parseTree * createParseTree(parseTree * root,tokenStream * ts, grammar * G){
 
 
 void traverseDeclStmt(parseTree *root, struct eachVariable* typeExpressionTable, int *sizeTypeExpTable){
-    struct parseTree* single_decl = root->children[0]->children[0];
-    if(!strcmp(single_decl->nodename, "<single_decl>")){
-        struct parseTree* single_line = single_decl->children[0];
-        if(!strcmp(single_line->nodename, "<single_prim>")){
-            typeExpressionTable = realloc(typeExpressionTable, sizeof(typeExpressionTable)*(*sizeTypeExpTable+1));
-            strcpy(typeExpressionTable[*sizeTypeExpTable].var_name, single_line->children[0]->children[2]->lexeme);
-            typeExpressionTable[*sizeTypeExpTable].field2 = 0;
-            typeExpressionTable[*sizeTypeExpTable].isDynamic = -1;
-            struct primitiveTypeExpression p;
-            char *temp = single_line->children[0]->children[3]->lexeme;
-            if(!strcmp(temp, "integer")){
-                p.type = INTEGER;
-            }   else if(!strcmp(temp, "real")){
-                p.type = REAL;
-            }   else{
-                p.type = BOOLEAN;
-            }
-            typeExpressionTable[*sizeTypeExpTable].typeExpression.p = p;
+    //struct parseTree* single_decl = root->children[0]->children[0];
+    struct parseTree* decl = root->children[0];
+    // if(!strcmp(single_decl->nodename, "<single_decl>")){
+    //     struct parseTree* single_line = single_decl->children[0];
+    //     if(!strcmp(single_line->nodename, "<single_prim>")){
+    //         typeExpressionTable = realloc(typeExpressionTable, sizeof(typeExpressionTable)*(*sizeTypeExpTable+1));
+    //         strcpy(typeExpressionTable[*sizeTypeExpTable].var_name, single_line->children[0]->children[2]->lexeme);
+    //         typeExpressionTable[*sizeTypeExpTable].field2 = 0;
+    //         typeExpressionTable[*sizeTypeExpTable].isDynamic = -1;
+    //         struct primitiveTypeExpression p;
+    //         char *temp = single_line->children[0]->children[3]->lexeme;
+    //         if(!strcmp(temp, "integer")){
+    //             p.type = INTEGER;
+    //         }   else if(!strcmp(temp, "real")){
+    //             p.type = REAL;
+    //         }   else{
+    //             p.type = BOOLEAN;
+    //         }
+    //         typeExpressionTable[*sizeTypeExpTable].typeExpression.p = p;
 
-            *sizeTypeExpTable++;
-        }   else if(!strcmp(single_line->nodename, "<single_rarr>")){
+    //         *sizeTypeExpTable++;
+    //     }   else if(!strcmp(single_line->nodename, "<single_rarr>")){
 
-        }   else if(!strcmp(single_line->nodename, "<single_jarr2d>")){
+    //     }   else if(!strcmp(single_line->nodename, "<single_jarr2d>")){
 
-        }   else{ // <single_jarr3d>
+    //     }   else{ // <single_jarr3d>
 
-        }
+    //     }
+    // }
+    eachVariable t;
+    if(!strcmp(decl->children[0]->nodename,"<single_jarr2d>"))
+    {
+        t=chkJagged2d(decl->children[0]->children[5],decl->children[0]->children[9]);
+        if(t.field2!=-1)
+        printf("Checked single2d Jarr : \nfield2 : %d , isDyn : %d , dim = %d , R1 = %s , R2 = %s\n",t.field2,t.isDynamic,t.typeExpression.j.dimensions,t.typeExpression.j.ranges_R1,t.typeExpression.j.ranges_R2);
     }
-
-    if(root->child_count==2){
-        traverseDeclStmt(root->children[1], typeExpressionTable, sizeTypeExpTable);
+    else if(!strcmp(decl->children[0]->nodename,"<list_jarr2d>"))
+    {
+        t=chkJagged2d(decl->children[0]->children[10],decl->children[0]->children[14]);
+        if(t.field2!=-1)
+        printf("Checked list2d Jarr : \nfield2 : %d , isDyn : %d , dim = %d , R1 = %s , R2 = %s\n",t.field2,t.isDynamic,t.typeExpression.j.dimensions,t.typeExpression.j.ranges_R1,t.typeExpression.j.ranges_R2);
     }
+    else if(!strcmp(decl->children[0]->nodename,"<single_jarr3d>"))
+    {
+        t=chkJagged3d(decl->children[0]->children[5],decl->children[0]->children[9]);
+        if(t.field2!=-1)
+        printf("Checked single3d Jarr : \nfield2 : %d , isDyn : %d , dim = %d , R1 = %s , R2 = %s\n",t.field2,t.isDynamic,t.typeExpression.j.dimensions,t.typeExpression.j.ranges_R1,t.typeExpression.j.ranges_R2);
+    }
+    else if(!strcmp(decl->children[0]->nodename,"<list_jarr3d>"))
+    {
+        t=chkJagged3d(decl->children[0]->children[10],decl->children[0]->children[14]);
+        if(t.field2!=-1)
+        printf("Checked list3d Jarr : \nfield2 : %d , isDyn : %d , dim = %d , R1 = %s , R2 = %s\n",t.field2,t.isDynamic,t.typeExpression.j.dimensions,t.typeExpression.j.ranges_R1,t.typeExpression.j.ranges_R2);
+    }
+    // if(root->child_count==2){
+    //     traverseDeclStmt(root->children[1], typeExpressionTable, sizeTypeExpTable);
+    // }
 }
 
 void traverseAssgmtStmt(parseTree *root, struct eachVariable* typeExpressionTable, int *sizeTypeExpTable){
@@ -688,12 +1045,17 @@ void traverseParseTree(parseTree *root, struct eachVariable* typeExpressionTable
     // if(strcmp(root->nodename, "<main_program>")){
     // for(int i=0; i<root->child_count; ++i){
         // if(strcmp(root->children[i]->nodename), "<decl_stmts>"){
-    traverseDeclStmt(root->children[3], typeExpressionTable, sizeTypeExpTable);
+    parseTree *temp = root->children[3];
+    while(temp->child_count>1){
+        traverseDeclStmt(temp->children[0], typeExpressionTable, sizeTypeExpTable);
+        temp = temp->children[1];    
+    }
+    
         // }
     // }
     // for(int i=0; i<root->child_count; ++i){
         // if(strcmp(root->children[i]->nodename), "<assgmt_stmts>"){
-    traverseAssgmtStmt(root->children[4], typeExpressionTable, sizeTypeExpTable);
+    //traverseAssgmtStmt(root->children[4], typeExpressionTable, sizeTypeExpTable);
         // }
     // }
     // }
@@ -736,7 +1098,7 @@ int main(){
     struct eachVariable* typeExpressionTable;
     int *sizeTypeExpTable=(int*)malloc(sizeof(int));
     *sizeTypeExpTable=0;
-   // traverseParseTree(root, typeExpressionTable, sizeTypeExpTable);
+    traverseParseTree(value, typeExpressionTable, sizeTypeExpTable);
     // getToken("{");
 
 
