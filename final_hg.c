@@ -465,7 +465,7 @@ tokenStream * tokeniseSourceCode(char * filename,tokenStream *s){
         }
 
         char * tempStr;
-        tempStr=strtok(line," ");
+        tempStr=strtok(line," \t\r");
 
 
         while (tempStr){
@@ -475,7 +475,7 @@ tokenStream * tokeniseSourceCode(char * filename,tokenStream *s){
             s->token=(char *)malloc((strlen(tempStr)+1)*sizeof(char));
             strcpy(s->token,getToken(tempStr));
             // printf("%s %d\n",s->lexeme,s->line_num);
-            tempStr=strtok(NULL," ");
+            tempStr=strtok(NULL," \t\r");
 
             s->next=(tokenStream *)malloc(sizeof(tokenStream));
             s=s->next;
