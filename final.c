@@ -134,12 +134,15 @@ eachVariable chkJagged2d(parseTree *dim_jarr2d,parseTree *ranges_desc)
             if(tempCount!=1) //error
             {
                 //printf("E1\n");
+                if(!errFlag)
+                {
+                    free(j.ranges_R1);
+                    free(j.ranges_R2);
+                }
                 errFlag=1;
                 if(line_num<temp_line_num)
                     line_num = temp_line_num;
                 retVal.field2 = -1;
-                free(j.ranges_R1);
-                free(j.ranges_R2); 
 
                 printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",line_num,"Declaration",tempDimVal->depth,"2D JA dimension mismatch");
 
@@ -152,31 +155,37 @@ eachVariable chkJagged2d(parseTree *dim_jarr2d,parseTree *ranges_desc)
             tempDimVal = tempDimVal->children[2];
             rowSizeYet++;
 
-            if(rowSizeYet>=rowSize) //error
-            {
-                //printf("E2\n");
-                errFlag=1;
-                if(line_num<temp_line_num)
-                    line_num = temp_line_num;
-                retVal.field2 = -1;
-                free(j.ranges_R1);
-                free(j.ranges_R2);
+            // if(rowSizeYet>=rowSize) //error
+            // {
+            //     //printf("E2\n");
+            //     if(!errFlag)
+            //     {
+            //         free(j.ranges_R1);
+            //         free(j.ranges_R2);
+            //     }
+            //     errFlag=1;
+            //     if(line_num<temp_line_num)
+            //         line_num = temp_line_num;
+            //     retVal.field2 = -1;
 
-                printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",line_num,"Declaration",tempDimVal->depth,"2D JA dimension mismatch");
+            //     printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",line_num,"Declaration",tempDimVal->depth,"2D JA dimension mismatch");
 
-                // printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",tempDimVal->line_num,"Declaration",tempDimVal->children[0]->children[0]->depth,"2D JA dimension mismatch");
-            }
+            //     // printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",tempDimVal->line_num,"Declaration",tempDimVal->children[0]->children[0]->depth,"2D JA dimension mismatch");
+            // }
         } //<dim_values> for ONE row traversed
 
         if(staticListCount(tempOne->children[11],&temp_line_num)!=1) //error
         {
             //printf("E3\n");
+            if(!errFlag)
+            {
+                free(j.ranges_R1);
+                free(j.ranges_R2);
+            }
             errFlag=1;
             if(line_num<temp_line_num)
                     line_num = temp_line_num;
             retVal.field2 = -1;
-            free(j.ranges_R1);
-            free(j.ranges_R2);
 
             printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",line_num,"Declaration",tempOne->depth,"2D JA dimension mismatch");
 
@@ -188,12 +197,15 @@ eachVariable chkJagged2d(parseTree *dim_jarr2d,parseTree *ranges_desc)
         if(rowSizeYet!=rowSize) //error
         {
             //printf("E4\n");
+            if(!errFlag)
+            {
+                free(j.ranges_R1);
+                free(j.ranges_R2);
+            }
             errFlag=1;
             if(line_num<temp_line_num)
                 line_num = temp_line_num;
             retVal.field2 = -1;
-            free(j.ranges_R1);
-            free(j.ranges_R2);
             printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",line_num,"Declaration",tempOne->depth,"2D JA dimension mismatch");
         }
 
@@ -206,12 +218,16 @@ eachVariable chkJagged2d(parseTree *dim_jarr2d,parseTree *ranges_desc)
     if(rowsYet!=numRows) //error
     {
         //printf("E5\n");
+        if(!errFlag)
+        {
+            free(j.ranges_R1);
+            free(j.ranges_R2);
+        }
         errFlag=1;
         if(line_num<temp_line_num)
             line_num = temp_line_num;
         retVal.field2 = -1;
-        free(j.ranges_R1);
-        free(j.ranges_R2);
+
         printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",line_num,"Declaration",tempRange->depth,"2D JA size mismatch");
     }
 
@@ -268,12 +284,16 @@ eachVariable chkJagged3d(parseTree *dim_jarr3d,parseTree *ranges_desc)
             tempCount = staticListCount(tempDimVal->children[0],&temp_line_num); //tempCount should NOT be zero
             if(!tempCount) //error
             {
+                if(!errFlag)
+                {
+                    free(j.ranges_R1);
+                    free(j.ranges_R2);
+                }
                 errFlag=1;
                 if(line_num<temp_line_num)
                     line_num = temp_line_num;
                 retVal.field2 = -1;
-                free(j.ranges_R1);
-                free(j.ranges_R2);
+                
                 printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",line_num,"Declaration",tempDimVal->depth,"3D JA dimension mismatch");
             }
 
@@ -292,29 +312,35 @@ eachVariable chkJagged3d(parseTree *dim_jarr3d,parseTree *ranges_desc)
             tempDimVal = tempDimVal->children[2];
             rowSizeYet++;
 
-            if(rowSizeYet>=rowSize) //error
-            {
-                errFlag=1;
-                if(line_num<temp_line_num)
-                    line_num = temp_line_num;
-                retVal.field2 = -1;
-                free(j.ranges_R1);
-                free(j.ranges_R2);
+            // if(rowSizeYet>=rowSize) //error
+            // {
+            //     if(!errFlag)
+            //     {
+            //         free(j.ranges_R1);
+            //         free(j.ranges_R2);
+            //     }
+            //     errFlag=1;
+            //     if(line_num<temp_line_num)
+            //         line_num = temp_line_num;
+            //     retVal.field2 = -1;
 
-                printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",line_num,"Declaration",tempDimVal->depth,"3D JA dimension mismatch");
+            //     printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",line_num,"Declaration",tempDimVal->depth,"3D JA dimension mismatch");
 
-                // printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",tempDimVal->line_num,"Declaration",tempDimVal->children[0]->children[0]->depth,"2D JA dimension mismatch");
-            }
+            //     // printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",tempDimVal->line_num,"Declaration",tempDimVal->children[0]->children[0]->depth,"2D JA dimension mismatch");
+            // }
         }//dim values traversed for one row
 
         if(!(tempCount=staticListCount(tempOne->children[11],&temp_line_num))) //error
         {
+            if(!errFlag)
+            {
+                free(j.ranges_R1);
+                free(j.ranges_R2);
+            }
             errFlag=1;
             if(line_num<temp_line_num)
                 line_num = temp_line_num;
             retVal.field2 = -1;
-            free(j.ranges_R1);
-            free(j.ranges_R2);
 
             printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",line_num,"Declaration",tempOne->depth,"3D JA dimension mismatch");
 
@@ -336,12 +362,16 @@ eachVariable chkJagged3d(parseTree *dim_jarr3d,parseTree *ranges_desc)
 
         if(rowSizeYet!=rowSize) //error
         {
+            if(!errFlag)
+            {
+                free(j.ranges_R1);
+                free(j.ranges_R2);
+            }
             errFlag=1;
             if(line_num<temp_line_num)
                 line_num = temp_line_num;
             retVal.field2 = -1;
-            free(j.ranges_R1);
-            free(j.ranges_R2);
+    
             printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",line_num,"Declaration",tempOne->depth,"3D JA dimension mismatch");
         }
 
@@ -353,12 +383,16 @@ eachVariable chkJagged3d(parseTree *dim_jarr3d,parseTree *ranges_desc)
 
     if(rowsYet!=numRows) //error
     {
+        if(!errFlag)
+        {
+            free(j.ranges_R1);
+            free(j.ranges_R2);
+        }
         errFlag=1;
         if(line_num<temp_line_num)
             line_num = temp_line_num;
         retVal.field2 = -1;
-        free(j.ranges_R1);
-        free(j.ranges_R2);
+    
         printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",line_num,"Declaration",tempRange->depth,"3D JA size mismatch");
     }
 
