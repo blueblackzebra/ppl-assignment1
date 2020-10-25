@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+// #include <malloc.h>
 
 
 enum primitiveType {INTEGER=1,REAL=2,BOOLEAN=3};
@@ -123,6 +124,16 @@ parseTree * makeTreeCopy(parseTree* t){
     return res;
 }
 
+void destroytreecopy(parseTree *root){
+    for(int i=0;i<root->child_count;i++){
+        destroytreecopy(root->children[i]);
+    }
+    // free(root->nodename);
+    free(root->lexeme);
+    free(root);
+    return;
+}
+
 
 /* Stack module */
 
@@ -218,6 +229,18 @@ stackNode * makecopy(stackNode ** s){
 
     stackNode* res2=makecopy2(&res);
     return res2;
+}
+
+void destroystackcopy(stackNode ** s){
+    while(!isempty(s)){
+        stackNode * temp=top(s);
+        pop(s);
+        temp->next=NULL;
+
+        // free(temp->data);
+        free(temp);
+    }
+    return;
 }
 
 /* Grammar module */
@@ -571,6 +594,8 @@ parseTree * genTree(parseTree* root,stackNode ** s, tokenStream ** ts, grammar *
 
     
     if (!check){
+        destroytreecopy(root);
+        destroystackcopy(s);
         return NULL;
     }
 
@@ -594,15 +619,16 @@ parseTree * genTree(parseTree* root,stackNode ** s, tokenStream ** ts, grammar *
             // Tree code here
 
             pushRule(iterRule,&s2,i+1);
-            stackNode * aaaa =top(&s2);
-            printf("%s\n",aaaa->data);
+            // stackNode * aaaa =top(&s2);
+            // printf("%s\n",aaaa->data);
             parseTree * check2=genTree(root2,&s2,&ts2,G);
             if (check2){
                 return check2;
             }
         }
     }
-
+    destroystackcopy(s);
+    destroytreecopy(root);
     return NULL;
 }
 
@@ -705,7 +731,7 @@ int main(){
         printf("0\n");
     }
     
-    
+    // malloc_stats();
 
     struct eachVariable* typeExpressionTable;
     int *sizeTypeExpTable=(int*)malloc(sizeof(int));
