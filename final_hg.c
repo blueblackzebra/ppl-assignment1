@@ -717,6 +717,7 @@ eachVariable singleRarr(parseTree *root, eachVariable **typeExpressionTable, int
     *dyn=0;
     ranges = dimrarr(root->children[4], ranges, dim, dyn);
     t.isDynamic = *dyn;
+    t.typeExpression.r.ranges = (char*)malloc(sizeof(ranges));
     strcat(t.typeExpression.r.ranges, ranges);
     t.typeExpression.r.dimensions = *dim;
     pushTypeTable(typeExpressionTable, sizeTypeExpTable, t);
@@ -856,7 +857,6 @@ void printTypeExp(eachVariable *typeExpressionTable, int sizeTypeExpTable) {
                 break;
         }
         printf("\ttype: ");
-        // printf("jaggedArray");
         if (t.field2 == 0) {
             printf("primitive\t");
             printf("basicElementType: %d", t.typeExpression.p.type);
@@ -903,12 +903,11 @@ int main(){
     // malloc_stats();
 
     eachVariable* typeExpressionTable = NULL;
-    // eachVariable* typeExpressionTable = (eachVariable *)malloc(sizeof(eachVariable));
     int *sizeTypeExpTable=(int*)malloc(sizeof(int));
     *sizeTypeExpTable=0;
     traverseParseTree(value, &typeExpressionTable, sizeTypeExpTable);
-    // getToken("{");
     printTypeExp(typeExpressionTable, *sizeTypeExpTable);
+    // getToken("{");
 
     return 0;
 }
