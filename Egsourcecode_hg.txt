@@ -1,0 +1,13 @@
+program () {
+    declare x1 : integer ;
+    declare list of variables x1 x2 : boolean ;
+    declare x1 : real ;
+    declare list of variables c1 c2 : real ;
+    declare list of variables abcd ghd2_1 ssd_2_3 : array [ 2 .. 5 ] of integer ;
+    declare list of variables u v : array [ 2 .. 5 ] [ 3 .. 6 ] of integer ;
+
+    x1 = x1 &&& x2 ;
+    new = d * e2 + w - 743892 ;
+    b1 = b2 &&& b3 ||| b1 ;
+    u [ 2 5 ] = v [ 3 4 ] + v1 ;
+}
