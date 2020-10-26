@@ -298,7 +298,7 @@ grammar * readGrammar(char * filename){
     char * line=(char *)malloc(150*sizeof(char));
     char * check;
     while (1){
-        check=fgets(line,200,filep);
+        check=fgets(line,150,filep);
         if (!check){
             break;
         }
@@ -350,7 +350,7 @@ struct Symbol{
 
 typedef struct Symbol tokenStream;
 
-char sourcename[]="newsrc.txt";
+char sourcename[]="t6.txt";
 
 void traverseS(tokenStream * s){
     printf("\nTraversal begins\n");
@@ -1304,6 +1304,7 @@ int main(){
 
     tokenStream * stream;
     stream=tokeniseSourceCode(sourcename,stream);
+    // tokenStream * copy1=stream;
 
     root=makenode("<main_program>",0,"",1,-1,0);
 
@@ -1339,15 +1340,15 @@ int main(){
 
     // malloc_stats();
 
-    stackNode * das =(stackNode *)malloc(sizeof(stackNode));
-    printf("%lu %lu\n",sizeof(stackNode),sizeof(parseTree));
+    // stackNode * das =(stackNode *)malloc(sizeof(stackNode));
+    // printf("%lu %lu\n",sizeof(stackNode),sizeof(parseTree));
     
+    // // malloc_stats();
+
+    // free(das);
+
     // malloc_stats();
 
-    free(das);
-
-    // malloc_stats();
-
-
+    
     return 0;
 }
