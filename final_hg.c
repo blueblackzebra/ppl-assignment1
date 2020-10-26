@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-// #include <malloc.h>
-
+#include <malloc.h>
 
 enum primitiveType {INTEGER=1,REAL=2,BOOLEAN=3};
 
@@ -78,7 +77,7 @@ parseTree * makenode(char * str,int terminal, char * lex, int grule, int num, in
     parseTree * temp=(parseTree *)malloc(sizeof(parseTree));
     temp->nodename=str;
     temp->is_terminal=terminal;
-    temp->children=(parseTree**)malloc(sizeof(parseTree*)*50); //no node will have more than 50 children
+    temp->children=(parseTree**)malloc(sizeof(parseTree*)*18); //no node will have more than 50 children
     temp->child_count=0;
     temp->copy=NULL;
     temp->lexeme=(char *)malloc(21*sizeof(char));
@@ -207,7 +206,20 @@ stackNode * makecopy2(stackNode ** s){
     }
     
     //stackNode* res2=makecopy2(&res);
+    
     return res;
+}
+
+void destroystackcopy(stackNode ** s){
+    while(!isempty(s)){
+        stackNode * temp=top(s);
+        pop(s);
+        temp->next=NULL;
+
+        // free(temp->data);
+        free(temp);
+    }
+    return;
 }
 
 stackNode * makecopy(stackNode ** s){
@@ -228,20 +240,11 @@ stackNode * makecopy(stackNode ** s){
     }
 
     stackNode* res2=makecopy2(&res);
+    destroystackcopy(&res);
     return res2;
 }
 
-void destroystackcopy(stackNode ** s){
-    while(!isempty(s)){
-        stackNode * temp=top(s);
-        pop(s);
-        temp->next=NULL;
 
-        // free(temp->data);
-        free(temp);
-    }
-    return;
-}
 
 /* Grammar module */
 
@@ -282,10 +285,10 @@ grammar * readGrammar(char * filename){
     grammar * G=(grammar *)malloc(sizeof(grammar));
 
     struct Node * temp;
-    G->rules=(struct Node **)malloc(1000*sizeof(struct Node *));
+    G->rules=(struct Node **)malloc(65*sizeof(struct Node *));
     int count=0;
 
-    char * line=(char *)malloc(200*sizeof(char));
+    char * line=(char *)malloc(150*sizeof(char));
     char * check;
     while (1){
         check=fgets(line,200,filep);
@@ -340,7 +343,7 @@ struct Symbol{
 
 typedef struct Symbol tokenStream;
 
-char sourcename[]="Egsourcecode.txt";
+char sourcename[]="newsrc.txt";
 
 void traverseS(tokenStream * s){
     printf("\nTraversal begins\n");
@@ -351,7 +354,7 @@ void traverseS(tokenStream * s){
 }
 
 char * getToken(char * lex){
-    char * tok=(char *)malloc(30*sizeof(char));
+    char * tok=(char *)malloc(12*sizeof(char));
 
     if (!strcmp(lex,"{")){
         tok="COB";   
@@ -438,6 +441,7 @@ char * getToken(char * lex){
         tok="STATIC_CNST";
     }
     else {
+        printf("%d %s\n",lex[0],lex);
         tok="VAR_NAME";
     }
 
@@ -465,7 +469,7 @@ tokenStream * tokeniseSourceCode(char * filename,tokenStream *s){
         }
 
         char * tempStr;
-        tempStr=strtok(line," \t\r");
+        tempStr=strtok(line," \t\r\n");
 
 
         while (tempStr){
@@ -475,7 +479,7 @@ tokenStream * tokeniseSourceCode(char * filename,tokenStream *s){
             s->token=(char *)malloc((strlen(tempStr)+1)*sizeof(char));
             strcpy(s->token,getToken(tempStr));
             // printf("%s %d\n",s->lexeme,s->line_num);
-            tempStr=strtok(NULL," \t\r");
+            tempStr=strtok(NULL," \t\r\n");
 
             s->next=(tokenStream *)malloc(sizeof(tokenStream));
             s=s->next;
@@ -538,6 +542,7 @@ void pushRule(struct Node * n, stackNode ** s, int grule){
         temp->next=NULL;
         push(s,temp);
     }
+    free(non_term);
 }
 
 int terminalMatch(stackNode ** s,tokenStream ** ts){
@@ -551,6 +556,7 @@ int terminalMatch(stackNode ** s,tokenStream ** ts){
         temp->treeptr->line_num=(*ts)->line_num;
         // printf("Matched is %s\n",temp->data);
         pop(s);
+        free(temp);
         temp=top(s);
         (*ts)=(*ts)->next;
     }
@@ -623,6 +629,8 @@ parseTree * genTree(parseTree* root,stackNode ** s, tokenStream ** ts, grammar *
             // printf("%s\n",aaaa->data);
             parseTree * check2=genTree(root2,&s2,&ts2,G);
             if (check2){
+                destroytreecopy(root);
+                destroystackcopy(s);
                 return check2;
             }
         }
@@ -1284,6 +1292,8 @@ int main(){
 
     root=makenode("<main_program>",0,"",1,-1,0);
 
+    // malloc_stats();
+
     parseTree * value=createParseTree(root,stream,temp);
 
     // printf("current tree is: \n");
@@ -1311,6 +1321,18 @@ int main(){
     traverseParseTree(value, &typeExpressionTable, sizeTypeExpTable);
     printTypeExp(typeExpressionTable, *sizeTypeExpTable);
     // getToken("{");
+
+    malloc_stats();
+
+    stackNode * das =(stackNode *)malloc(sizeof(stackNode));
+    printf("%lu %lu\n",sizeof(stackNode),sizeof(parseTree));
+    
+    malloc_stats();
+
+    free(das);
+
+    malloc_stats();
+
 
     return 0;
 }
