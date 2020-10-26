@@ -100,7 +100,14 @@ void printTree(parseTree* t){
     if(t==NULL){
         return;
     }
-    printf("%s ",t->nodename);
+    if (t->is_terminal){
+        printf("%-20s TERMINAL       %-20s %-12d %-4d %-4d\n",t->nodename,t->lexeme,t->line_num,t->gramRule,t->depth);
+    }
+    else {
+        char ran[]="NOT DEFINED";
+        printf("%-20s NON-TERMINAL   %-20s %-12s %-4d %-4d\n",t->nodename,ran,ran,t->gramRule,t->depth);
+
+    }
 
     for(int i=0;i<t->child_count;i++){
         printTree(t->children[i]);
@@ -441,7 +448,7 @@ char * getToken(char * lex){
         tok="STATIC_CNST";
     }
     else {
-        printf("%d %s\n",lex[0],lex);
+        // printf("%d %s\n",lex[0],lex);
         tok="VAR_NAME";
     }
 
@@ -1306,12 +1313,12 @@ int main(){
 
     // printf("current tree is: \n");
     // printTree(value);
-    printf("\nLevel tree is \n");
-    stackNode * first=NULL;
-    stackNode * second=NULL;
-    stackNode * x=makestackNode(NULL,-1,value);
-    push(&first,x);
-    // printLevelTree(&first,&second);
+    printf("\nTree is \n");
+    // stackNode * first=NULL;
+    // stackNode * second=NULL;
+    // stackNode * x=makestackNode(NULL,-1,value);
+    // push(&first,x);
+    printTree(value);
     printf("Tree end\n\n");
 
     if (value){
@@ -1330,16 +1337,16 @@ int main(){
     printTypeExp(typeExpressionTable, *sizeTypeExpTable);
     // getToken("{");
 
-    malloc_stats();
+    // malloc_stats();
 
     stackNode * das =(stackNode *)malloc(sizeof(stackNode));
     printf("%lu %lu\n",sizeof(stackNode),sizeof(parseTree));
     
-    malloc_stats();
+    // malloc_stats();
 
     free(das);
 
-    malloc_stats();
+    // malloc_stats();
 
 
     return 0;
