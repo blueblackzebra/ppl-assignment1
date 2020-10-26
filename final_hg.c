@@ -61,7 +61,7 @@ typedef struct parseTree{
     
     //Type_exp type;
 
-    struct parseTree ** children;
+    struct parseTree * children[18];
     int child_count;
     char * lexeme;
     int gramRule;
@@ -77,7 +77,7 @@ parseTree * makenode(char * str,int terminal, char * lex, int grule, int num, in
     parseTree * temp=(parseTree *)malloc(sizeof(parseTree));
     temp->nodename=str;
     temp->is_terminal=terminal;
-    temp->children=(parseTree**)malloc(sizeof(parseTree*)*18); //no node will have more than 50 children
+    // temp->children=(parseTree**)malloc(sizeof(parseTree*)*18); //no node will have more than 50 children
     temp->child_count=0;
     temp->copy=NULL;
     temp->lexeme=(char *)malloc(21*sizeof(char));
@@ -343,7 +343,7 @@ struct Symbol{
 
 typedef struct Symbol tokenStream;
 
-char sourcename[]="testcases/t6.txt";
+char sourcename[]="newsrc.txt";
 
 void traverseS(tokenStream * s){
     printf("\nTraversal begins\n");
