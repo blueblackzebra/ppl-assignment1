@@ -1234,6 +1234,146 @@ eachVariable eachDecl(parseTree *root, eachVariable **typeExpressionTable, int *
     return root->typeExpression;
 }
 
+eachVariable searchTypeTable(eachVariable *typeExpressionTable, int size, char var_name[21]) {
+    for (int i = 0; i < size; ++i) {
+        if (!strcmp(typeExpressionTable[i].var_name, var_name)) {
+            return typeExpressionTable[i];
+        }
+    }
+    return typeExpressionTable[0];
+}
+
+eachVariable index_(parseTree *root, eachVariable *typeExpressionTable, int sizeTypeExpTable) {
+    if (root->children[0]->nodename[0] == 'V') {
+        return searchTypeTable(typeExpressionTable, sizeTypeExpTable, root->children[0]->lexeme);
+    } else {
+        eachVariable t;
+        t.field2 = 0;
+        t.isDynamic = -1;
+        t.typeExpression.p.type = INTEGER;
+        return t;
+    }
+}
+
+void rarrFindVal(char **lval, char **rval, char *ranges, int idx) {
+}
+
+int checkBound(char *ranges, int idx, int chkIdx) {
+    return 0;
+}
+
+int withinBound(parseTree *index_v, parseTree *index_list, eachVariable v) {
+    if (index_v->children[0]->nodename[0] == 'V') {
+        printf("Warning: %s has dynamic indexing. Cannot check array bound errors at compile time.", v.var_name);
+        return 1;
+    } else {
+        if (v.field2 == 1) {
+            // rarr
+            char *lval, *rval;
+            rarrFindVal(&lval, &rval, v.typeExpression.r.ranges, 0);
+            int lval_int = atoi(lval);
+            int rval_int = atoi(rval);
+            int idx = atoi(index_v->children[0]->lexeme);
+            if (idx >= lval && idx <= rval) {
+                return 1;
+            }
+        } else {
+            // jagged
+            // return saminaFunc();
+        }
+    }
+    int i = 1;
+    while (index_list->child_count != 1) {
+        parseTree *chkIdx = index_list->children[0];
+
+        if (chkIdx->children[0]->nodename[0] == 'V') {
+        }
+        // check
+
+        index_list = index_list->children[1];
+        ++i;
+    }
+    return 0;
+}
+
+eachVariable array_elem(parseTree *root, eachVariable *typeExpressionTable, int sizeTypeExpTable) {
+    eachVariable t = searchTypeTable(typeExpressionTable, sizeTypeExpTable, root->children[0]->lexeme);
+    eachVariable ret;
+    ret.field2 = 0;
+    ret.isDynamic = -1;
+    ret.typeExpression.p.type = INTEGER;
+    if (t.isDynamic == 1) {
+        printf("Warning: %s has dynamic indexing. Cannot check array bound errors at compile time.", t.var_name);
+        return ret;
+    } else if (withinBound(root->children[2], root->children[3], t) == 1) {
+        return ret;
+    }
+    printf("Error: Bound checking error");  // TODO
+    ret.field2 = -1;
+    return ret;
+}
+
+eachVariable computeLhsOp(parseTree *root, eachVariable *typeExpressionTable, int sizeTypeExpTable) {
+}
+
+eachVariable computeExpr1(parseTree *root, eachVariable *typeExpressionTable, int sizeTypeExpTable) {
+}
+
+eachVariable computeExpr2(parseTree *root, eachVariable *typeExpressionTable, int sizeTypeExpTable) {
+}
+
+eachVariable computeExpr3(parseTree *root, eachVariable *typeExpressionTable, int sizeTypeExpTable) {
+}
+
+eachVariable computeExpr4(parseTree *root, eachVariable *typeExpressionTable, int sizeTypeExpTable) {
+}
+
+int sameType(eachVariable t1, eachVariable t2) {
+    if (t1.field2 == -1 || t2.field2 == -1) {
+        return -1;
+    } else {
+        if (t1.field2 == t2.field2) {
+            if (t1.field2 == 0) {
+                if (t1.typeExpression.p.type == t2.typeExpression.p.type) {
+                    return 1;
+                }
+            } else if (t1.field2 == 1) {
+                if (!strcmp(t1.typeExpression.r.ranges, t2.typeExpression.r.ranges)) {
+                    return 1;
+                }
+            } else {
+                if (!strcmp(t1.typeExpression.j.ranges_R1, t2.typeExpression.j.ranges_R1) && !strcmp(t1.typeExpression.j.ranges_R2, t2.typeExpression.j.ranges_R2)) {
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+void oneAssgmt(parseTree *root, eachVariable *typeExpressionTable, int sizeTypeExpTable) {
+    eachVariable lhs_op = computeLhsOp(root->children[0], typeExpressionTable, sizeTypeExpTable);
+    eachVariable expr1 = computeExpr1(root->children[2], typeExpressionTable, sizeTypeExpTable);
+
+    int ret = sameType(lhs_op, expr1);
+    if (ret == 1) {
+        root->typeExpression = lhs_op;
+        return;
+    } else if (ret == -1) {
+        root->typeExpression.field2 = -1;
+        return;
+    }
+    printf("Error: Types don't match for assignment");  // TODO
+}
+
+void traverseAssgmtStmt(parseTree *root, eachVariable *typeExpressionTable, int sizeTypeExpTable) {
+    oneAssgmt(root->children[0], typeExpressionTable, sizeTypeExpTable);
+    if (root->child_count == 2) {
+        traverseAssgmtStmt(root->children[1], typeExpressionTable, sizeTypeExpTable);
+    }
+    return;
+}
+
 void traverseDeclStmt(parseTree *root, eachVariable **typeExpressionTable, int *sizeTypeExpTable) {
     eachDecl(root->children[0], typeExpressionTable, sizeTypeExpTable);
     if (root->child_count == 2) {
@@ -1242,13 +1382,9 @@ void traverseDeclStmt(parseTree *root, eachVariable **typeExpressionTable, int *
     return;
 }
 
-void traverseAssgmtStmt(parseTree *root, eachVariable **typeExpressionTable, int *sizeTypeExpTable){
-
-}
-
-void traverseParseTree(parseTree *root, eachVariable **typeExpressionTable, int *sizeTypeExpTable){
+void traverseParseTree(parseTree *root, eachVariable **typeExpressionTable, int *sizeTypeExpTable) {
     traverseDeclStmt(root->children[3], typeExpressionTable, sizeTypeExpTable);
-    traverseAssgmtStmt(root->children[4], typeExpressionTable, sizeTypeExpTable);
+    traverseAssgmtStmt(root->children[4], *typeExpressionTable, sizeTypeExpTable);
 }
 
 void printTypeExp(eachVariable *typeExpressionTable, int sizeTypeExpTable) {
