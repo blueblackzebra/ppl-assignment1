@@ -686,7 +686,8 @@ eachVariable chkJagged2d(parseTree *dim_jarr2d,parseTree *ranges_desc)
     int numRows = dim2-dim1+1;
 
     //populating R1 in typeExpr
-    j.ranges_R1 = (char*) malloc(sizeof(dim_jarr2d->children[1]->lexeme)+sizeof(dim_jarr2d->children[3]->lexeme)+sizeof(char));
+    j.ranges_R1 = (char*) malloc(strlen(dim_jarr2d->children[1]->lexeme)+strlen(dim_jarr2d->children[3]->lexeme)+sizeof(char));
+    j.ranges_R1[0]='\0';
     strcat(j.ranges_R1,dim_jarr2d->children[1]->lexeme);
     strcat(j.ranges_R1," ");
     strcat(j.ranges_R1,dim_jarr2d->children[3]->lexeme);
@@ -708,9 +709,9 @@ eachVariable chkJagged2d(parseTree *dim_jarr2d,parseTree *ranges_desc)
 
         if(!errFlag)
         {   
-            j.ranges_R2 = (char*) realloc(j.ranges_R2,sizeof(tempOne->children[6]->lexeme)+sizeof(char)+sizeR2);
+            j.ranges_R2 = (char*) realloc(j.ranges_R2,strlen(tempOne->children[6]->lexeme)+sizeof(char)+sizeR2);
             if(!firstIter) j.ranges_R2[0] = '\0';
-            sizeR2+=sizeof(tempOne->children[6]->lexeme)+sizeof(char);
+            sizeR2+=strlen(tempOne->children[6]->lexeme)+sizeof(char);
             strcat(j.ranges_R2,tempOne->children[6]->lexeme);
             strcat(j.ranges_R2," ");
             firstIter=1;
@@ -840,7 +841,8 @@ eachVariable chkJagged3d(parseTree *dim_jarr3d,parseTree *ranges_desc)
     int numRows = dim2-dim1+1;
 
     //populating R1 in typeExpr
-    j.ranges_R1 = (char*) malloc(sizeof(dim_jarr3d->children[1]->lexeme)+sizeof(dim_jarr3d->children[3]->lexeme)+sizeof(char));
+    j.ranges_R1 = (char*) malloc(strlen(dim_jarr3d->children[1]->lexeme)+strlen(dim_jarr3d->children[3]->lexeme)+sizeof(char));
+    j.ranges_R1[0]='\0';
     strcat(j.ranges_R1,dim_jarr3d->children[1]->lexeme);
     strcat(j.ranges_R1," ");
     strcat(j.ranges_R1,dim_jarr3d->children[3]->lexeme);
@@ -862,9 +864,9 @@ eachVariable chkJagged3d(parseTree *dim_jarr3d,parseTree *ranges_desc)
 
         if(!errFlag)
         {
-            j.ranges_R2 = (char*) realloc(j.ranges_R2,sizeof(tempOne->children[6]->lexeme)+3*sizeof(char)+sizeR2);
+            j.ranges_R2 = (char*) realloc(j.ranges_R2,strlen(tempOne->children[6]->lexeme)+3*sizeof(char)+sizeR2);
             if(!firstIter) j.ranges_R2[0] = '\0'; 
-            sizeR2+=sizeof(tempOne->children[6]->lexeme)+3*sizeof(char);
+            sizeR2+=strlen(tempOne->children[6]->lexeme)+3*sizeof(char);
             strcat(j.ranges_R2,tempOne->children[6]->lexeme);
             strcat(j.ranges_R2," [ ");
             firstIter=1;
