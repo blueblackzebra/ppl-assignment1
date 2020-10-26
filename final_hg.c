@@ -343,7 +343,7 @@ struct Symbol{
 
 typedef struct Symbol tokenStream;
 
-char sourcename[]="newsrc.txt";
+char sourcename[]="testcases/t6.txt";
 
 void traverseS(tokenStream * s){
     printf("\nTraversal begins\n");
@@ -1052,8 +1052,12 @@ char *dimrarr(parseTree *root, char *ranges, int *dim, int *dyn){
 
     // strcat(ranges, "[");
     // printf("\nHEH %x\n", &ranges);
-    if(ranges!=NULL) ranges = (char*) realloc(ranges, sizeof(char)*(strlen(ranges)+strlen(lval)+strlen(rval)+1));
-    else ranges = (char*) realloc(ranges, sizeof(char)*(0+strlen(lval)+strlen(rval)+1));
+    if (ranges != NULL) {
+        ranges = (char *)realloc(ranges, sizeof(char) * (strlen(ranges) + strlen(lval) + strlen(rval) + 1));
+    } else {
+        ranges = (char *)malloc(sizeof(char) * (0 + strlen(lval) + strlen(rval) + 1));
+        ranges[0] = '\0';
+    }
     strcat(ranges, lval);
     // strcat(ranges, ' ');
     strcat(ranges, ",");
@@ -1080,6 +1084,7 @@ eachVariable singleRarr(parseTree *root, eachVariable **typeExpressionTable, int
     ranges = dimrarr(root->children[4], ranges, dim, dyn);
     t.isDynamic = *dyn;
     t.typeExpression.r.ranges = (char*)malloc(sizeof(ranges));
+    t.typeExpression.r.ranges[0] = '\0';
     strcat(t.typeExpression.r.ranges, ranges);
     t.typeExpression.r.dimensions = *dim;
     pushTypeTable(typeExpressionTable, sizeTypeExpTable, t);
@@ -1158,6 +1163,7 @@ eachVariable listRarr(parseTree *root, eachVariable **typeExpressionTable, int *
     // printf("\nI WAS CALLED %d\n", sizeof(char)*(strlen(ranges)));
     t.typeExpression.r.dimensions = *dim;
     t.typeExpression.r.ranges = (char*)malloc(sizeof(ranges));
+    t.typeExpression.r.ranges[0] = '\0';
     strcat(t.typeExpression.r.ranges, ranges);
     strcpy(t.var_name, root->children[4]->lexeme);
     root->children[4]->typeExpression = t;
