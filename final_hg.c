@@ -350,7 +350,7 @@ struct Symbol{
 
 typedef struct Symbol tokenStream;
 
-char sourcename[]="testcases/t1.txt";
+char sourcename[]="testcases/t4.txt";
 
 void traverseS(tokenStream * s){
     printf("\nTraversal begins\n");
@@ -1258,47 +1258,6 @@ eachVariable index_(parseTree *root, eachVariable *typeExpressionTable, int size
     }
 }
 
-void rarrFindVal(char **lval, char **rval, char *ranges, int idx) {
-}
-
-int checkBound(char *ranges, int idx, int chkIdx) {
-    return 0;
-}
-
-int withinBound(parseTree *index_v, parseTree *index_list, eachVariable v) {
-    if (index_v->children[0]->nodename[0] == 'V') {
-        printf("Warning: %s has dynamic indexing. Cannot check array bound errors at compile time.", v.var_name);
-        return 1;
-    } else {
-        if (v.field2 == 1) {
-            // rarr
-            char *lval, *rval;
-            rarrFindVal(&lval, &rval, v.typeExpression.r.ranges, 0);
-            int lval_int = atoi(lval);
-            int rval_int = atoi(rval);
-            int idx = atoi(index_v->children[0]->lexeme);
-            if (idx >= lval_int && idx <= rval_int) {
-                return 1;
-            }
-        } else {
-            // jagged
-            // return saminaFunc();
-        }
-    }
-    int i = 1;
-    while (index_list->child_count != 1) {
-        parseTree *chkIdx = index_list->children[0];
-
-        if (chkIdx->children[0]->nodename[0] == 'V') {
-        }
-        // check
-
-        index_list = index_list->children[1];
-        ++i;
-    }
-    return 0;
-}
-
 int chkBound(eachVariable t,parseTree* index_,parseTree* index_list,eachVariable *typeExpressionTable, int sizeTypeExpTable)
 {
     if(t.field2==1) //rectangular array
@@ -1537,6 +1496,7 @@ eachVariable computeExpr4(parseTree *root, eachVariable *typeExpressionTable, in
     } else {
         t = array_elem(root->children[0]->children[0], typeExpressionTable, sizeTypeExpTable);
     }
+    root->children[0]->typeExpression = t;
     if (root->child_count == 3) {
         char shortMessage[31];
         shortMessage[0] = '\0';
@@ -1545,7 +1505,7 @@ eachVariable computeExpr4(parseTree *root, eachVariable *typeExpressionTable, in
         eachVariable t2 = computeExpr4(root->children[2], typeExpressionTable, sizeTypeExpTable);
         if (t.field2 == -1 || t2.field2 == -1) {
             root->typeExpression.field2 = -1;
-            printf("Error in node below");  // TODO:
+            printf("Error propagated from RHS of %s\n", root->children[1]->lexeme);
             return root->typeExpression;
         }
         if (t.field2 == 0 && t2.field2 == 0) {
@@ -1564,8 +1524,16 @@ eachVariable computeExpr4(parseTree *root, eachVariable *typeExpressionTable, in
                 return root->typeExpression;
             }
         }
-        // TODO:
-        printf("ERRORRRRR");
+        printf("ERROR : %4d %12s %s %s %s %s %s %4d %30s\n", \
+            root->children[1]->line_num, \
+            "Assignment", \
+            root->children[1]->lexeme, \
+            root->children[0]->typeExpression.var_name, \
+            root->children[0]->lexeme, \
+            root->children[2]->typeExpression.var_name, \
+            root->children[2]->lexeme, \
+            root->depth, \
+            shortMessage);  // TODO
         root->typeExpression.field2 = -1;
         return root->typeExpression;
     }
@@ -1584,7 +1552,7 @@ eachVariable computeExpr3(parseTree *root, eachVariable *typeExpressionTable, in
         eachVariable t2 = computeExpr3(root->children[2], typeExpressionTable, sizeTypeExpTable);
         if (t.field2 == -1 || t2.field2 == -1) {
             root->typeExpression.field2 = -1;
-            printf("Error in node below");  // TODO:
+            printf("Error propagated from RHS of %s\n", root->children[1]->lexeme);
             return root->typeExpression;
         }
         if (t.field2 == 0 && t2.field2 == 0) {
@@ -1619,8 +1587,16 @@ eachVariable computeExpr3(parseTree *root, eachVariable *typeExpressionTable, in
                 }
             }
         }
-        // TODO:
-        printf("ERRORRRRR");
+        printf("ERROR : %4d %12s %s %s %s %s %s %4d %30s\n", \
+            root->children[1]->line_num, \
+            "Assignment", \
+            root->children[1]->lexeme, \
+            root->children[0]->typeExpression.var_name, \
+            root->children[0]->lexeme, \
+            root->children[2]->typeExpression.var_name, \
+            root->children[2]->lexeme, \
+            root->depth, \
+            shortMessage);  // TODO
         root->typeExpression.field2 = -1;
         return root->typeExpression;
     }
@@ -1638,7 +1614,7 @@ eachVariable computeExpr2(parseTree *root, eachVariable *typeExpressionTable, in
         eachVariable t2 = computeExpr2(root->children[2], typeExpressionTable, sizeTypeExpTable);
         if (t.field2 == -1 || t2.field2 == -1) {
             root->typeExpression.field2 = -1;
-            printf("Error in node below");  // TODO:
+            printf("Error propagated from RHS of OR\n");
             return root->typeExpression;
         }
         if (t.field2 == 0 && t2.field2 == 0) {
@@ -1647,8 +1623,16 @@ eachVariable computeExpr2(parseTree *root, eachVariable *typeExpressionTable, in
                 return t;
             }
         }
-        // TODO:
-        printf("Error: BOOL_OR performed on this this");
+        printf("ERROR : %4d %12s %s %s %s %s %s %4d %30s\n", \
+            root->children[1]->line_num, \
+            "Assignment", \
+            root->children[1]->lexeme, \
+            root->children[0]->typeExpression.var_name, \
+            root->children[0]->lexeme, \
+            root->children[2]->typeExpression.var_name, \
+            root->children[2]->lexeme, \
+            root->depth, \
+            shortMessage);  // TODO
         root->typeExpression.field2 = -1;
         return root->typeExpression;
     }
@@ -1666,7 +1650,7 @@ eachVariable computeExpr1(parseTree *root, eachVariable *typeExpressionTable, in
         eachVariable t2 = computeExpr1(root->children[2], typeExpressionTable, sizeTypeExpTable);
         if (t.field2 == -1 || t2.field2 == -1) {
             root->typeExpression.field2 = -1;
-            printf("Error in node below");  // TODO:
+            printf("Error propagated from RHS of AND");
             return root->typeExpression;
         }
         if (t.field2 == 0 && t2.field2 == 0) {
@@ -1675,8 +1659,17 @@ eachVariable computeExpr1(parseTree *root, eachVariable *typeExpressionTable, in
                 return t;
             }
         }
-        // TODO:
-        printf("Error: BOOL_AND performed on this this");
+
+        printf("ERROR : %4d %12s %s %s %s %s %s %4d %30s\n", \
+            root->children[1]->line_num, \
+            "Assignment", \
+            root->children[1]->lexeme, \
+            root->children[0]->typeExpression.var_name, \
+            root->children[0]->lexeme, \
+            root->children[2]->typeExpression.var_name, \
+            root->children[2]->lexeme, \
+            root->depth, \
+            shortMessage);  // TODO
         root->typeExpression.field2 = -1;
         return root->typeExpression;
     }
@@ -1728,9 +1721,19 @@ void oneAssgmt(parseTree *root, eachVariable *typeExpressionTable, int sizeTypeE
         return;
     } else if (ret == -1) {
         root->typeExpression.field2 = -1;
+        printf("Error at assignment propagated from RHS\n");
         return;
     }
-    printf("Error: Types don't match for assignment");  // TODO:
+    printf("ERROR : %4d %12s %s %s %s %s %s %4d %30s\n", \
+        root->children[1]->line_num, \
+        "Assignment", \
+        root->children[1]->lexeme, \
+        root->children[0]->typeExpression.var_name, \
+        root->children[0]->lexeme, \
+        root->children[2]->typeExpression.var_name, \
+        root->children[2]->lexeme, \
+        root->depth, \
+        "Types don't match for assignment");  // TODO
 }
 
 void traverseAssgmtStmt(parseTree *root, eachVariable *typeExpressionTable, int sizeTypeExpTable) {
