@@ -1313,19 +1313,169 @@ eachVariable array_elem(parseTree *root, eachVariable *typeExpressionTable, int 
     return ret;
 }
 
-eachVariable computeLhsOp(parseTree *root, eachVariable *typeExpressionTable, int sizeTypeExpTable) {
-}
-
-eachVariable computeExpr1(parseTree *root, eachVariable *typeExpressionTable, int sizeTypeExpTable) {
-}
-
-eachVariable computeExpr2(parseTree *root, eachVariable *typeExpressionTable, int sizeTypeExpTable) {
+eachVariable computeExpr4(parseTree *root, eachVariable *typeExpressionTable, int sizeTypeExpTable) {
+    eachVariable t;
+    if (root->children[0]->children[0]->nodename[1] == 'i') {
+        t = index_(root->children[0]->children[0], typeExpressionTable, sizeTypeExpTable);
+    } else {
+        t = array_elem(root->children[0]->children[0], typeExpressionTable, sizeTypeExpTable);
+    }
+    if (root->child_count == 3) {
+        char shortMessage[31];
+        shortMessage[0] = '\0';
+        strcat(shortMessage, "Incompatible type for ");
+        (!strcmp(root->children[1]->lexeme, "+")) ? strcat(shortMessage, "addition") : strcat(shortMessage, "subtract");
+        eachVariable t2 = computeExpr4(root->children[2], typeExpressionTable, sizeTypeExpTable);
+        if (t.field2 == -1 || t2.field2 == -1) {
+            root->typeExpression.field2 = -1;
+            printf("Error in node below");  // TODO:
+            return root->typeExpression;
+        }
+        if (t.field2 == 0 && t2.field2 == 0) {
+            if (t.typeExpression.p.type == t2.typeExpression.p.type) {
+                root->typeExpression = t;
+                return root->typeExpression;
+            }
+        } else if (t.field2 == 1 && t2.field2 == 1) {
+            if (!strcmp(t.typeExpression.r.ranges, t2.typeExpression.r.ranges)) {
+                root->typeExpression = t;
+                return root->typeExpression;
+            }
+        } else if (t.field2 == 2 && t2.field2 == 2) {
+            if (!strcmp(t.typeExpression.j.ranges_R1, t2.typeExpression.j.ranges_R1) && !strcmp(t.typeExpression.j.ranges_R2, t2.typeExpression.j.ranges_R2)) {
+                root->typeExpression = t;
+                return root->typeExpression;
+            }
+        }
+        // TODO:
+        printf("ERRORRRRR");
+        root->typeExpression.field2 = -1;
+        return root->typeExpression;
+    }
+    root->typeExpression = t;
+    return t;
 }
 
 eachVariable computeExpr3(parseTree *root, eachVariable *typeExpressionTable, int sizeTypeExpTable) {
+    eachVariable t;
+    t = computeExpr4(root->children[0], typeExpressionTable, sizeTypeExpTable);
+    if (root->child_count == 3) {
+        char shortMessage[31];
+        shortMessage[0] = '\0';
+        strcat(shortMessage, "Incompatible type for ");
+        (!strcmp(root->children[1]->lexeme, "/")) ? strcat(shortMessage, "division") : strcat(shortMessage, "multiply");
+        eachVariable t2 = computeExpr3(root->children[2], typeExpressionTable, sizeTypeExpTable);
+        if (t.field2 == -1 || t2.field2 == -1) {
+            root->typeExpression.field2 = -1;
+            printf("Error in node below");  // TODO:
+            return root->typeExpression;
+        }
+        if (t.field2 == 0 && t2.field2 == 0) {
+            if (!strcmp(root->children[1]->lexeme, "/")) {
+                if ((t.typeExpression.p.type == INTEGER && t2.typeExpression.p.type == INTEGER) || (t.typeExpression.p.type == REAL && t2.typeExpression.p.type == REAL)) {
+                    root->typeExpression.field2 = 0;
+                    root->typeExpression.typeExpression.p.type = REAL;
+                    return root->typeExpression;
+                }
+            } else {
+                if (t.typeExpression.p.type == t2.typeExpression.p.type) {
+                    root->typeExpression = t;
+                    return root->typeExpression;
+                }
+            }
+        } else if (t.field2 == 1 && t2.field2 == 1) {
+            if (!strcmp(root->children[1]->lexeme, "/")) {
+                strcpy(shortMessage, "Arrays don't support division");
+            } else {
+                if (!strcmp(t.typeExpression.r.ranges, t2.typeExpression.r.ranges)) {
+                    root->typeExpression = t;
+                    return root->typeExpression;
+                }
+            }
+        } else if (t.field2 == 2 && t2.field2 == 2) {
+            if (!strcmp(root->children[1]->lexeme, "/")) {
+                strcpy(shortMessage, "Arrays don't support division");
+            } else {
+                if (!strcmp(t.typeExpression.j.ranges_R1, t2.typeExpression.j.ranges_R1) && !strcmp(t.typeExpression.j.ranges_R2, t2.typeExpression.j.ranges_R2)) {
+                    root->typeExpression = t;
+                    return root->typeExpression;
+                }
+            }
+        }
+        // TODO:
+        printf("ERRORRRRR");
+        root->typeExpression.field2 = -1;
+        return root->typeExpression;
+    }
+    root->typeExpression = t;
+    return t;
 }
 
-eachVariable computeExpr4(parseTree *root, eachVariable *typeExpressionTable, int sizeTypeExpTable) {
+eachVariable computeExpr2(parseTree *root, eachVariable *typeExpressionTable, int sizeTypeExpTable) {
+    eachVariable t;
+    t = computeExpr3(root->children[0], typeExpressionTable, sizeTypeExpTable);
+    if (root->child_count == 3) {
+        char shortMessage[31];
+        shortMessage[0] = '\0';
+        strcat(shortMessage, "Incompatible type for OR.");
+        eachVariable t2 = computeExpr1(root->children[2], typeExpressionTable, sizeTypeExpTable);
+        if (t.field2 == -1 || t2.field2 == -1) {
+            root->typeExpression.field2 = -1;
+            printf("Error in node below");  // TODO:
+            return root->typeExpression;
+        }
+        if (t.field2 == 0 && t2.field2 == 0) {
+            if (t.typeExpression.p.type == BOOLEAN && t2.typeExpression.p.type == BOOLEAN) {
+                root->typeExpression = t;
+                return t;
+            }
+        }
+        // TODO:
+        printf("Error: BOOL_OR performed on this this");
+        root->typeExpression.field2 = -1;
+        return root->typeExpression;
+    }
+    root->typeExpression = t;
+    return t;
+}
+
+eachVariable computeExpr1(parseTree *root, eachVariable *typeExpressionTable, int sizeTypeExpTable) {
+    eachVariable t;
+    t = computeExpr2(root->children[0], typeExpressionTable, sizeTypeExpTable);
+    if (root->child_count == 3) {
+        char shortMessage[31];
+        shortMessage[0] = '\0';
+        strcat(shortMessage, "Incompatible type for AND.");
+        eachVariable t2 = computeExpr1(root->children[2], typeExpressionTable, sizeTypeExpTable);
+        if (t.field2 == -1 || t2.field2 == -1) {
+            root->typeExpression.field2 = -1;
+            printf("Error in node below");  // TODO:
+            return root->typeExpression;
+        }
+        if (t.field2 == 0 && t2.field2 == 0) {
+            if (t.typeExpression.p.type == BOOLEAN && t2.typeExpression.p.type == BOOLEAN) {
+                root->typeExpression = t;
+                return t;
+            }
+        }
+        // TODO:
+        printf("Error: BOOL_AND performed on this this");
+        root->typeExpression.field2 = -1;
+        return root->typeExpression;
+    }
+    root->typeExpression = t;
+    return t;
+}
+
+eachVariable computeLhsOp(parseTree *root, eachVariable *typeExpressionTable, int sizeTypeExpTable) {
+    eachVariable t;
+    if (root->children[0]->nodename[0] == 'V') {
+        t = searchTypeTable(typeExpressionTable, sizeTypeExpTable, root->children[0]->lexeme);
+    } else {
+        t = array_elem(root->children[0], typeExpressionTable, sizeTypeExpTable);
+    }
+    root->typeExpression = t;
+    return t;
 }
 
 int sameType(eachVariable t1, eachVariable t2) {
@@ -1363,7 +1513,7 @@ void oneAssgmt(parseTree *root, eachVariable *typeExpressionTable, int sizeTypeE
         root->typeExpression.field2 = -1;
         return;
     }
-    printf("Error: Types don't match for assignment");  // TODO
+    printf("Error: Types don't match for assignment");  // TODO:
 }
 
 void traverseAssgmtStmt(parseTree *root, eachVariable *typeExpressionTable, int sizeTypeExpTable) {
