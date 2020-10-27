@@ -1,4 +1,4 @@
-<main_program> program RB COB <decl_stmts> <assgmt_stmts> CCB
+<main_program> program LRB RRB COB <decl_stmts> <assgmt_stmts> CCB
 <decl_stmts> <one_decl>
 <decl_stmts> <one_decl> <decl_stmts>
 <assgmt_stmts> <one_assgmt>
