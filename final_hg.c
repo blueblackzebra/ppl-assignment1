@@ -1299,22 +1299,236 @@ int withinBound(parseTree *index_v, parseTree *index_list, eachVariable v) {
     return 0;
 }
 
+int chkBound(eachVariable t,parseTree* index_,parseTree* index_list,eachVariable *typeExpressionTable, int sizeTypeExpTable)
+{
+    if(t.field2==1) //rectangular array
+    {
+        //populating an array to store the dimension ranges from the type expression
+        int dimRanges[t.typeExpression.r.dimensions*2];
+        int ind=0;
+        char *ranges_dup = strdup(t.typeExpression.r.ranges);
+        char *token = strtok(ranges_dup,",;");
+        while(token!=NULL)
+        {
+            dimRanges[ind] = atoi(token);
+            ind++;
+            token = strtok(NULL,",;");
+        }
+        free(ranges_dup);
+
+        //checking if indices in bound or notby traversing index_ and index_list
+        ind=0;
+
+        do
+         {
+             if(!strcmp(index_->children[0]->nodename,"VAR_NAME"))
+             {
+                eachVariable varType = searchTypeTable(typeExpressionTable,sizeTypeExpTable,index_->children[0]->lexeme);
+                if(varType.field2!=0||(varType.field2==0&&varType.typeExpression.p.type!=INTEGER))
+                {
+                    printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",index_->children[0]->line_num,"Assignment",index_->children[0]->depth,"Invalid index");
+                    return 1;
+                }
+                printf("WARNG : %4d %12s *** *** *** *** *** %4d %30s\n",index_->children[0]->line_num,"Assignment",index_->children[0]->depth,"Dynamic indexing-Runtime check");
+                return 0;
+             }
+             else if(!strcmp(index_->children[0]->nodename,"STATIC_CNST"))
+             {
+                int left = dimRanges[ind*2];
+                int right = dimRanges[ind*2+1];
+                int currIndVal = atoi(index_->children[0]->lexeme);
+                printf("%d %d %d\n",left,currIndVal,right);
+                if(!(left<=currIndVal&&right>=currIndVal))
+                {
+                    printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",index_->children[0]->line_num,"Assignment",index_->children[0]->depth,"Invalid index");
+                    return 1;
+                }
+
+             }
+
+             index_ = index_list->children[0];
+             printf("%s %d\n",index_->nodename,index_list->child_count);
+             if(index_list->child_count>1)
+                index_list = index_list->children[1];
+            ind++;
+
+         } while (strcmp(index_->nodename,"epsilon")); 
+        return 0;
+    }
+
+    else if(t.field2==2) //jagged array
+    {
+            int range1[2],firstIndex;
+            char* R1_dup = strdup(t.typeExpression.j.ranges_R1);
+            int ind=0;
+            char *token = strtok(R1_dup," ");
+            while(token!=NULL)
+            {
+                range1[ind] = atoi(token);
+                ind++;
+                token = strtok(NULL," ");
+            }
+            free(R1_dup);
+
+            if(!strcmp(index_->children[0]->nodename,"VAR_NAME"))
+             {
+                eachVariable varType = searchTypeTable(typeExpressionTable,sizeTypeExpTable,index_->children[0]->lexeme);
+                if(varType.field2!=0||(varType.field2==0&&varType.typeExpression.p.type!=INTEGER))
+                {
+                    printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",index_->children[0]->line_num,"Assignment",index_->children[0]->depth,"Invalid index");
+                    return 1;
+                }
+                printf("WARNG : %4d %12s *** *** *** *** *** %4d %30s\n",index_->children[0]->line_num,"Assignment",index_->children[0]->depth,"Dynamic indexing-Runtime check");
+                return 0;
+             }
+             else if(!strcmp(index_->children[0]->nodename,"STATIC_CNST"))
+             {
+                firstIndex = atoi(index_->children[0]->lexeme);
+                if(!(range1[0]<=firstIndex&&range1[1]>=firstIndex))
+                {
+                    printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",index_->children[0]->line_num,"Assignment",index_->children[0]->depth,"Invalid index");
+                    return 1;
+                }
+
+             }
+
+             if(t.typeExpression.j.dimensions==2) //2djagged
+             {
+                //only one more index to check
+                char *R2_dup = strdup(t.typeExpression.j.ranges_R2);
+                char *token = strtok(R2_dup," ");
+                int indexPos=range1[0];
+                int secondIndMax = atoi(token);
+                while(indexPos!=firstIndex)
+                {
+                    token = strtok(NULL," ");
+                    indexPos++;
+                    secondIndMax = atoi(token);
+                }
+                index_ = index_list->children[0];
+                free(R2_dup);
+                if(!strcmp(index_->children[0]->nodename,"VAR_NAME"))
+                 {
+                    eachVariable varType = searchTypeTable(typeExpressionTable,sizeTypeExpTable,index_->children[0]->lexeme);
+                    if(varType.field2!=0||(varType.field2==0&&varType.typeExpression.p.type!=INTEGER))
+                    {
+                        printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",index_->children[0]->line_num,"Assignment",index_->children[0]->depth,"Invalid index");
+                        return 1;
+                    }
+                    printf("WARNG : %4d %12s *** *** *** *** *** %4d %30s\n",index_->children[0]->line_num,"Assignment",index_->children[0]->depth,"Dynamic indexing-Runtime check");
+                    return 0;
+                 }
+                 else if(!strcmp(index_->children[0]->nodename,"STATIC_CNST"))
+                 {
+                    int currIndVal = atoi(index_->children[0]->lexeme);
+                    if(!(1<=currIndVal&&secondIndMax>=currIndVal))
+                    {
+                        printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",index_->children[0]->line_num,"Assignment",index_->children[0]->depth,"Invalid index");
+                        return 1;
+                    }
+
+                 }
+                    return 0;
+             }
+
+             else if(t.typeExpression.j.dimensions==3) //3d jagged
+             {
+                //check 2nd index
+                index_ = index_list->children[0];
+                int secondIndex;
+                char *R2_dup = strdup(t.typeExpression.j.ranges_R2);
+                char *token = strtok(R2_dup,"]"),*token2;
+                int indexPos=range1[0];
+                while(indexPos!=firstIndex)
+                {
+                    token = strtok(NULL,"]");
+                    indexPos++;
+                }
+                token2 = strtok(token," [");
+                int secondIndMax = atoi(token2); 
+                if(!strcmp(index_->children[0]->nodename,"VAR_NAME"))
+                 {
+                    eachVariable varType = searchTypeTable(typeExpressionTable,sizeTypeExpTable,index_->children[0]->lexeme);
+                    if(varType.field2!=0||(varType.field2==0&&varType.typeExpression.p.type!=INTEGER))
+                    {
+                        printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",index_->children[0]->line_num,"Assignment",index_->children[0]->depth,"Invalid index");
+                        return 1;
+                    }
+                    printf("WARNG : %4d %12s *** *** *** *** *** %4d %30s\n",index_->children[0]->line_num,"Assignment",index_->children[0]->depth,"Dynamic indexing-Runtime check");
+                    return 0;
+                 }
+                 else if(!strcmp(index_->children[0]->nodename,"STATIC_CNST"))
+                 {
+                    secondIndex = atoi(index_->children[0]->lexeme);
+                    if(!(1<=secondIndex&&secondIndMax>=secondIndex))
+                    {
+                        printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",index_->children[0]->line_num,"Assignment",index_->children[0]->depth,"Invalid index");
+                        return 1;
+                    }
+
+                 }
+
+                 //check 3rd index
+                 int thirdIndex, thirdIndMax; 
+                 for(int k=1;k<=secondIndex;k++)
+                 {
+                    token2 = strtok(NULL," [");
+                 }
+                 thirdIndMax = atoi(token2);
+                 index_ = index_list->children[1]->children[0];
+
+                 if(!strcmp(index_->children[0]->nodename,"VAR_NAME"))
+                 {
+                    eachVariable varType = searchTypeTable(typeExpressionTable,sizeTypeExpTable,index_->children[0]->lexeme);
+                    if(varType.field2!=0||(varType.field2==0&&varType.typeExpression.p.type!=INTEGER))
+                    {
+                        printf("WARNG : %4d %12s *** *** *** *** *** %4d %30s\n",index_->children[0]->line_num,"Assignment",index_->children[0]->depth,"Invalid index");
+                        return 1;
+                    }
+                    printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",index_->children[0]->line_num,"Assignment",index_->children[0]->depth,"Dynamic indexing-Runtime check");
+                    return 0;
+                 }
+                 else if(!strcmp(index_->children[0]->nodename,"STATIC_CNST"))
+                 {
+                    thirdIndex = atoi(index_->children[0]->lexeme);
+                    if(!(1<=thirdIndex&&thirdIndMax>=thirdIndex))
+                    {
+                        printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",index_->children[0]->line_num,"Assignment",index_->children[0]->depth,"Invalid index");
+                        return 1;
+                    }
+
+                 }
+                free(R2_dup);
+                return 0;
+             }
+    }
+}
+
 eachVariable array_elem(parseTree *root, eachVariable *typeExpressionTable, int sizeTypeExpTable) {
     eachVariable t = searchTypeTable(typeExpressionTable, sizeTypeExpTable, root->children[0]->lexeme);
     eachVariable ret;
     ret.field2 = 0;
     ret.isDynamic = -1;
     ret.typeExpression.p.type = INTEGER;
-    if (t.isDynamic == 1) {
-        printf("Warning: %s has dynamic indexing. Cannot check array bound errors at compile time.", t.var_name);
-        return ret;
-    } else if (withinBound(root->children[2], root->children[3], t) == 1) {
+    if(t.field2==-1) //variable has error in declaration 
+    {
+        ret.field2 = -1;
         return ret;
     }
-    printf("Error: Bound checking error");  // TODO
+    if (t.isDynamic == 1) {
+        printf("ERROR : %4d %12s *** *** *** *** *** %4d %30s\n",root->children[0]->line_num,"Assignment",root->children[0]->depth,"Dynamic indexing-Runtime check");
+        return ret;
+    } 
+    else if (t.field2 == 1 || t.field2 == 2) { //ARRAY 
+        int r = chkBound(t,root->children[2],root->children[3],typeExpressionTable,sizeTypeExpTable);
+        if(!r) //no error
+            return ret;
+    }
+
     ret.field2 = -1;
     return ret;
 }
+
 
 eachVariable computeExpr4(parseTree *root, eachVariable *typeExpressionTable, int sizeTypeExpTable) {
     eachVariable t;
@@ -1536,8 +1750,8 @@ void traverseDeclStmt(parseTree *root, eachVariable **typeExpressionTable, int *
 }
 
 void traverseParseTree(parseTree *root, eachVariable **typeExpressionTable, int *sizeTypeExpTable) {
-    traverseDeclStmt(root->children[3], typeExpressionTable, sizeTypeExpTable);
-    traverseAssgmtStmt(root->children[4], *typeExpressionTable, sizeTypeExpTable);
+    traverseDeclStmt(root->children[4], typeExpressionTable, sizeTypeExpTable);
+    traverseAssgmtStmt(root->children[5], *typeExpressionTable, *sizeTypeExpTable);
 }
 
 void printTypeExp(eachVariable *typeExpressionTable, int sizeTypeExpTable) {
