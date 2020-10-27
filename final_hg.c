@@ -350,7 +350,7 @@ struct Symbol{
 
 typedef struct Symbol tokenStream;
 
-char sourcename[]="t6.txt";
+char sourcename[]="testcases/t1.txt";
 
 void traverseS(tokenStream * s){
     printf("\nTraversal begins\n");
@@ -1277,7 +1277,7 @@ int withinBound(parseTree *index_v, parseTree *index_list, eachVariable v) {
             int lval_int = atoi(lval);
             int rval_int = atoi(rval);
             int idx = atoi(index_v->children[0]->lexeme);
-            if (idx >= lval && idx <= rval) {
+            if (idx >= lval_int && idx <= rval_int) {
                 return 1;
             }
         } else {
@@ -1635,7 +1635,7 @@ eachVariable computeExpr2(parseTree *root, eachVariable *typeExpressionTable, in
         char shortMessage[31];
         shortMessage[0] = '\0';
         strcat(shortMessage, "Incompatible type for OR.");
-        eachVariable t2 = computeExpr1(root->children[2], typeExpressionTable, sizeTypeExpTable);
+        eachVariable t2 = computeExpr2(root->children[2], typeExpressionTable, sizeTypeExpTable);
         if (t.field2 == -1 || t2.field2 == -1) {
             root->typeExpression.field2 = -1;
             printf("Error in node below");  // TODO:
