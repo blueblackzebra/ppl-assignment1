@@ -1,4 +1,4 @@
-program ()
+program ( )
 {
 	declare list of variables new d w e2 : integer ;
 	declare v1 : integer ;
