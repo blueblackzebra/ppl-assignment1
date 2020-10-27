@@ -375,8 +375,11 @@ char * getToken(char * lex){
     else if(!strcmp(lex,"]")){
         tok="SCB";
     }
-    else if(!strcmp(lex,"()")){
-        tok="RB";
+    else if(!strcmp(lex,"(")){
+        tok="LRB";
+    }
+    else if(!strcmp(lex,")")){
+        tok="RRB";
     }
     else if(!strcmp(lex,"..")){
         tok="TO";
