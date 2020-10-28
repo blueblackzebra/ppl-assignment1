@@ -1966,12 +1966,12 @@ tokenStream *tokeniseSourceCode(char *filename, tokenStream *s) {
     s = (tokenStream *)malloc(sizeof(tokenStream));
     tokenStream *ret = s;
 
-    char *line = (char *)malloc(200 * sizeof(char));
+    char *line = (char *)malloc(300 * sizeof(char));
     char *check;
     int count = 1;
 
     while (1) {
-        check = fgets(line, 200, filep);
+        check = fgets(line, 300, filep);
         if (!check) {
             break;
         }
