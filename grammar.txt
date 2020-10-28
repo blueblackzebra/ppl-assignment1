@@ -41,13 +41,13 @@
 <dim_jarr3d> SOB STATIC_CNST TO STATIC_CNST SCB SOB SCB SOB SCB 
 <one_assgmt> <lhs_op> ASSGN_OP <expr1> SC
 <expr1> <expr2>
-<expr1> <expr2> BOOL_AND <expr1>
+<expr1> <expr2> BOOL_OR <expr1>
 <expr2> <expr3>
-<expr2> <expr3> BOOL_OR <expr2>
+<expr2> <expr3> BOOL_AND <expr2>
 <expr3> <expr4>
-<expr3> <expr4> AR_OP1 <expr3>
+<expr3> <expr4> AR_OP2 <expr3>
 <expr4> <rhs_op>
-<expr4> <rhs_op> AR_OP2 <expr4>
+<expr4> <rhs_op> AR_OP1 <expr4>
 <rhs_op> <index_>
 <rhs_op> <array_elem>
 <lhs_op> VAR_NAME
