@@ -235,73 +235,6 @@ typedef struct {
     struct Node **rules;
 } grammar;
 
-void traverseG(grammar *G) {
-    struct Node **p = G->rules;
-
-    int i = 0;
-
-    while (p[i]) {
-        struct Node *n = p[i];
-        printf("%s\n", n->piece);
-        while (n->next) {
-            n = n->next;
-            printf("%s\n", n->piece);
-        }
-        printf("\n");
-        i++;
-    }
-}
-
-grammar *readGrammar(char *filename) {
-    FILE *filep = fopen(filename, "r");
-
-    grammar *G = (grammar *)malloc(sizeof(grammar));
-
-    struct Node *temp;
-    G->rules = (struct Node **)malloc(65 * sizeof(struct Node *));
-    int count = 0;
-
-    char *line = (char *)malloc(150 * sizeof(char));
-    char *check;
-    while (1) {
-        check = fgets(line, 150, filep);
-        if (!check) {
-            break;
-        }
-        if (line[strlen(line) - 1] == '\n') {
-            line[strlen(line) - 1] = '\0';
-        }
-        struct Node *trav = (struct Node *)malloc(sizeof(struct Node));
-        G->rules[count] = trav;
-
-        char *tempStr;
-        tempStr = strtok(line, " ");
-
-        trav->piece = (char *)malloc((strlen(tempStr) + 1) * sizeof(char));
-        strcpy(trav->piece, tempStr);
-
-        trav->next = (struct Node *)malloc(sizeof(struct Node));
-        // trav=trav->next;
-        tempStr = strtok(NULL, " ");
-
-        while (tempStr) {
-            trav = trav->next;
-
-            trav->piece = (char *)malloc((strlen(tempStr) + 1) * sizeof(char));
-            strcpy(trav->piece, tempStr);
-
-            trav->next = (struct Node *)malloc(sizeof(struct Node));
-            tempStr = strtok(NULL, " ");
-        }
-
-        trav->next = NULL;
-
-        count++;
-    }
-    fclose(filep);
-    return G;
-}
-
 /* Token Stream module */
 
 struct Symbol {
@@ -312,14 +245,6 @@ struct Symbol {
 };
 
 typedef struct Symbol tokenStream;
-
-void traverseS(tokenStream *s) {
-    printf("\nTraversal begins\n");
-    while (s != NULL) {
-        printf("%s %d\n", s->lexeme, s->line_num);
-        s = s->next;
-    }
-}
 
 char *getToken(char *lex) {
     char *tok = (char *)malloc(12 * sizeof(char));
@@ -383,60 +308,10 @@ char *getToken(char *lex) {
     } else if (lex[0] >= 48 && lex[0] <= 57) {
         tok = "STATIC_CNST";
     } else {
-        // printf("%d %s\n",lex[0],lex);
         tok = "VAR_NAME";
     }
 
     return tok;
-}
-
-tokenStream *tokeniseSourceCode(char *filename, tokenStream *s) {
-    FILE *filep = fopen(filename, "r");
-    if (filep==NULL){
-        return NULL;
-    }
-    s = (tokenStream *)malloc(sizeof(tokenStream));
-    tokenStream *ret = s;
-
-    char *line = (char *)malloc(200 * sizeof(char));
-    char *check;
-    int count = 1;
-
-    while (1) {
-        check = fgets(line, 200, filep);
-        if (!check) {
-            break;
-        }
-        if (line[strlen(line) - 1] == '\n') {
-            line[strlen(line) - 1] = '\0';
-        }
-
-        char *tempStr;
-        tempStr = strtok(line, " \t\r\n");
-
-        while (tempStr) {
-            s->line_num = count;
-            s->lexeme = (char *)malloc((strlen(tempStr) + 1) * sizeof(char));
-            strcpy(s->lexeme, tempStr);
-            s->token = (char *)malloc((strlen(tempStr) + 1) * sizeof(char));
-            strcpy(s->token, getToken(tempStr));
-            // printf("%s %d\n",s->lexeme,s->line_num);
-            tempStr = strtok(NULL, " \t\r\n");
-
-            s->next = (tokenStream *)malloc(sizeof(tokenStream));
-            s = s->next;
-        }
-
-        count++;
-    }
-    s = ret;
-
-    while (s->next->line_num < count && s->next->line_num > 0) {
-        s = s->next;
-    }
-    s->next = NULL;
-
-    return ret;
 }
 
 void pushRule(struct Node *n, stackNode **s, int grule) {
@@ -498,36 +373,6 @@ int terminalMatch(stackNode **s, tokenStream **ts) {
     return 1;
 }
 
-void printLevelTree(stackNode **first, stackNode **second) {
-    while (!isempty(first)) {
-        stackNode *temp3 = top(first);
-        pop(first);
-        temp3->next = NULL;
-        push(second, temp3);
-    }
-
-    if (isempty(second)) {
-        return;
-    }
-
-    while (!isempty(second)) {
-        // Read node
-        // Push to first
-        stackNode *temp = top(second);
-        pop(second);
-        temp->next = NULL;
-        printf("%s {%d %d} ", temp->treeptr->nodename, temp->treeptr->line_num, temp->treeptr->depth);
-
-        for (int i = 0; i < temp->treeptr->child_count; i++) {
-            stackNode *temp2 = makestackNode(NULL, -1, temp->treeptr->children[i]);
-            push(first, temp2);
-        }
-    }
-    printf("\n");
-
-    printLevelTree(first, second);
-}
-
 parseTree *genTree(parseTree *root, stackNode **s, tokenStream **ts, grammar *G) {
     int check = terminalMatch(s, ts);
 
@@ -570,15 +415,34 @@ parseTree *genTree(parseTree *root, stackNode **s, tokenStream **ts, grammar *G)
     return NULL;
 }
 
-parseTree *createParseTree(parseTree *root, tokenStream *ts, grammar *G) {
-    stackNode *s = NULL;
-    stackNode *t = NULL;
-    t = makestackNode("<main_program>", 0, root);
-    push(&s, t);
+void printLevelTree(stackNode **first, stackNode **second) {
+    while (!isempty(first)) {
+        stackNode *temp3 = top(first);
+        pop(first);
+        temp3->next = NULL;
+        push(second, temp3);
+    }
 
-    parseTree *value = genTree(root, &s, &ts, G);
+    if (isempty(second)) {
+        return;
+    }
 
-    return value;
+    while (!isempty(second)) {
+        // Read node
+        // Push to first
+        stackNode *temp = top(second);
+        pop(second);
+        temp->next = NULL;
+        printf("%s {%d %d} ", temp->treeptr->nodename, temp->treeptr->line_num, temp->treeptr->depth);
+
+        for (int i = 0; i < temp->treeptr->child_count; i++) {
+            stackNode *temp2 = makestackNode(NULL, -1, temp->treeptr->children[i]);
+            push(first, temp2);
+        }
+    }
+    printf("\n");
+
+    printLevelTree(first, second);
 }
 
 // Building type expression table
@@ -1937,31 +1801,6 @@ void oneAssgmt(parseTree *root, eachVariable *typeExpressionTable, int sizeTypeE
     printAssError(root, lhs_op, expr1, "Types don't match for assignment");
 }
 
-void traverseAssgmtStmt(parseTree *root, eachVariable *typeExpressionTable, int sizeTypeExpTable) {
-    oneAssgmt(root->children[0], typeExpressionTable, sizeTypeExpTable);
-    if (root->child_count == 2) {
-        traverseAssgmtStmt(root->children[1], typeExpressionTable, sizeTypeExpTable);
-    }
-    return;
-}
-
-void traverseDeclStmt(parseTree *root, eachVariable **typeExpressionTable, int *sizeTypeExpTable) {
-    eachDecl(root->children[0], typeExpressionTable, sizeTypeExpTable);
-    if (root->child_count == 2) {
-        traverseDeclStmt(root->children[1], typeExpressionTable, sizeTypeExpTable);
-    }
-    return;
-}
-
-void traverseParseTree(parseTree *root, eachVariable **typeExpressionTable, int *sizeTypeExpTable) {
-    printf("%-15s %-15s %-10s %-20s %-91s %-20s %-91s %-5s %-30s\n", "Line number", "Statement type", "Operator", "Lexeme of 1st", "Type of 1st", "Lexeme of 2nd", "Type of 2nd", "Depth", "Short Message");
-    for (int i = 0; i < 300; i++) printf("-");
-    printf("\n");
-    traverseDeclStmt(root->children[4], typeExpressionTable, sizeTypeExpTable);
-    // printf("Errors encountered while parsing assignment\n");
-    traverseAssgmtStmt(root->children[5], *typeExpressionTable, *sizeTypeExpTable);
-}
-
 void printVar(eachVariable t) {
     printf("%-20s", t.var_name);
     if (t.field2 == -1) {
@@ -2012,20 +1851,149 @@ void printVar(eachVariable t) {
     printf("\n");
 }
 
-void printTypeExp(eachVariable *typeExpressionTable, int sizeTypeExpTable) {
-    printf("\n");
-    printf("%-19s %-16s %-21s %-60s\n", "Variable name", "Is Dynamic?", "basicElementType", "Data type");
-    for (int i = 0; i < 120; i++) printf("-");
-    printf("\n");
-    for (int i = 0; i < sizeTypeExpTable; ++i) {
-        eachVariable t = typeExpressionTable[i];
-        printVar(t);
+void traverseAssgmtStmt(parseTree *root, eachVariable *typeExpressionTable, int sizeTypeExpTable) {
+    oneAssgmt(root->children[0], typeExpressionTable, sizeTypeExpTable);
+    if (root->child_count == 2) {
+        traverseAssgmtStmt(root->children[1], typeExpressionTable, sizeTypeExpTable);
     }
+    return;
+}
+
+void traverseDeclStmt(parseTree *root, eachVariable **typeExpressionTable, int *sizeTypeExpTable) {
+    eachDecl(root->children[0], typeExpressionTable, sizeTypeExpTable);
+    if (root->child_count == 2) {
+        traverseDeclStmt(root->children[1], typeExpressionTable, sizeTypeExpTable);
+    }
+    return;
+}
+
+/* GIVEN BELOW ARE THE FUNCTIONS SPECIFIED IN THE ASSIGNMENT SHEET AND THE DRIVER CODE */
+/* ABOVE THIS WE HAVE DEFINED ALL THE DATA STRUCTURES AND HELPER FUNCTIONS */
+/////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////
+
+grammar *readGrammar(char *filename) {
+    FILE *filep = fopen(filename, "r");
+
+    grammar *G = (grammar *)malloc(sizeof(grammar));
+
+    struct Node *temp;
+    G->rules = (struct Node **)malloc(65 * sizeof(struct Node *));
+    int count = 0;
+
+    char *line = (char *)malloc(150 * sizeof(char));
+    char *check;
+    while (1) {
+        check = fgets(line, 150, filep);
+        if (!check) {
+            break;
+        }
+        if (line[strlen(line) - 1] == '\n') {
+            line[strlen(line) - 1] = '\0';
+        }
+        struct Node *trav = (struct Node *)malloc(sizeof(struct Node));
+        G->rules[count] = trav;
+
+        char *tempStr;
+        tempStr = strtok(line, " ");
+
+        trav->piece = (char *)malloc((strlen(tempStr) + 1) * sizeof(char));
+        strcpy(trav->piece, tempStr);
+
+        trav->next = (struct Node *)malloc(sizeof(struct Node));
+        // trav=trav->next;
+        tempStr = strtok(NULL, " ");
+
+        while (tempStr) {
+            trav = trav->next;
+
+            trav->piece = (char *)malloc((strlen(tempStr) + 1) * sizeof(char));
+            strcpy(trav->piece, tempStr);
+
+            trav->next = (struct Node *)malloc(sizeof(struct Node));
+            tempStr = strtok(NULL, " ");
+        }
+
+        trav->next = NULL;
+
+        count++;
+    }
+    fclose(filep);
+    return G;
+}
+
+tokenStream *tokeniseSourceCode(char *filename, tokenStream *s) {
+    FILE *filep = fopen(filename, "r");
+    if (filep==NULL){
+        return NULL;
+    }
+    s = (tokenStream *)malloc(sizeof(tokenStream));
+    tokenStream *ret = s;
+
+    char *line = (char *)malloc(200 * sizeof(char));
+    char *check;
+    int count = 1;
+
+    while (1) {
+        check = fgets(line, 200, filep);
+        if (!check) {
+            break;
+        }
+        if (line[strlen(line) - 1] == '\n') {
+            line[strlen(line) - 1] = '\0';
+        }
+
+        char *tempStr;
+        tempStr = strtok(line, " \t\r\n");
+
+        while (tempStr) {
+            s->line_num = count;
+            s->lexeme = (char *)malloc((strlen(tempStr) + 1) * sizeof(char));
+            strcpy(s->lexeme, tempStr);
+            s->token = (char *)malloc((strlen(tempStr) + 1) * sizeof(char));
+            strcpy(s->token, getToken(tempStr));
+            
+            tempStr = strtok(NULL, " \t\r\n");
+
+            s->next = (tokenStream *)malloc(sizeof(tokenStream));
+            s = s->next;
+        }
+
+        count++;
+    }
+    s = ret;
+
+    while (s->next->line_num < count && s->next->line_num > 0) {
+        s = s->next;
+    }
+    s->next = NULL;
+
+    return ret;
+}
+
+parseTree *createParseTree(parseTree *root, tokenStream *ts, grammar *G) {
+    stackNode *s = NULL;
+    stackNode *t = NULL;
+    t = makestackNode("<main_program>", 0, root);
+    push(&s, t);
+
+    parseTree *value = genTree(root, &s, &ts, G);
+
+    return value;
+}
+
+void traverseParseTree(parseTree *root, eachVariable **typeExpressionTable, int *sizeTypeExpTable) {
+    printf("%-15s %-15s %-10s %-20s %-91s %-20s %-91s %-5s %-30s\n", "Line number", "Statement type", "Operator", "Lexeme of 1st", "Type of 1st", "Lexeme of 2nd", "Type of 2nd", "Depth", "Short Message");
+    for (int i = 0; i < 300; i++) printf("-");
+    printf("\n");
+    traverseDeclStmt(root->children[4], typeExpressionTable, sizeTypeExpTable);
+    
+    traverseAssgmtStmt(root->children[5], *typeExpressionTable, *sizeTypeExpTable);
 }
 
 void printParseTree(parseTree *t) {
     char ** typexp= returnVar(t->typeExpression);
-    // printf("%d\n", (t->typeExpression).field2);
 
     if (t == NULL) {
         return;
@@ -2054,6 +2022,17 @@ void printParseTree(parseTree *t) {
     }
 
     return;
+}
+
+void printTypeExpressionTable(eachVariable *typeExpressionTable, int sizeTypeExpTable) {
+    printf("\n");
+    printf("%-19s %-16s %-21s %-60s\n", "Variable name", "Is Dynamic?", "basicElementType", "Data type");
+    for (int i = 0; i < 120; i++) printf("-");
+    printf("\n");
+    for (int i = 0; i < sizeTypeExpTable; ++i) {
+        eachVariable t = typeExpressionTable[i];
+        printVar(t);
+    }
 }
 
 int main(int argc, char * argv[]) {
@@ -2146,7 +2125,7 @@ int main(int argc, char * argv[]) {
             *sizeTypeExpTable = 0;
             traverseParseTree(value, &typeExpressionTable, sizeTypeExpTable);
             printf("\nPrinting the Type Expression table\n");
-            printTypeExp(typeExpressionTable, *sizeTypeExpTable);
+            printTypeExpressionTable(typeExpressionTable, *sizeTypeExpTable);
             printf("\n");
             destroytreecopy(value);
         }
