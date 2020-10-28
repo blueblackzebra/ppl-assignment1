@@ -5,7 +5,7 @@
 
 char filename[] = "grammar.txt";
 
-char sourcename[] = "testcases/t4.txt";
+char sourcename[] = "testcases/t6.txt";
 
 enum primitiveType { INTEGER = 1,
                      REAL = 2,
@@ -86,6 +86,7 @@ parseTree *makenode(char *str, int terminal, char *lex, int grule, int num, int 
     temp->gramRule = grule;
     temp->line_num = num;
     temp->depth = d;
+    (temp->typeExpression).field2=-2;
     //add type expression here;
 }
 
@@ -2015,16 +2016,28 @@ void printTypeExp(eachVariable *typeExpressionTable, int sizeTypeExpTable) {
 
 void printParseTree(parseTree *t) {
     char ** typexp= returnVar(t->typeExpression);
-    // printf("%s\n", (t->typeExpression).var_name);
+    // printf("%d\n", (t->typeExpression).field2);
 
     if (t == NULL) {
         return;
     }
     if (t->is_terminal) {
-        printf("%-20s TERMINAL       %-20s %-12d %-15d %-5d \n", t->nodename, t->lexeme, t->line_num, t->gramRule, t->depth);
-    } else {
+        printf("%-20s TERMINAL       %-20s %-12d %-15d %-10d %-20s %-80s\n", t->nodename, t->lexeme, t->line_num, t->gramRule, t->depth,"not defined for leaf nodes","");
+    } else if ((t->typeExpression).field2==-1) {
         char ran[] = "NOT DEFINED";
-        printf("%-20s NON-TERMINAL   %-20s %-12s %-15d %-5d \n", t->nodename, ran, ran, t->gramRule, t->depth);
+        printf("%-20s NON-TERMINAL   %-20s %-12s %-15d %-10d %-20s %-80s\n", t->nodename, ran, ran, t->gramRule, t->depth,"error","");
+    }
+    else if ((t->typeExpression).field2==-2){
+        char ran[] = "NOT DEFINED";
+
+        printf("%-20s NON-TERMINAL   %-20s %-12s %-15d %-10d %-20s %-80s\n", t->nodename, ran, ran, t->gramRule, t->depth,"not applicable for this node","");
+
+    }
+    else {
+        char ran[] = "NOT DEFINED";
+
+        printf("%-20s NON-TERMINAL   %-20s %-12s %-15d %-10d %-20s %-80s\n", t->nodename, ran, ran, t->gramRule, t->depth,typexp[1],typexp[3]);
+
     }
 
     for (int i = 0; i < t->child_count; i++) {
@@ -2033,8 +2046,6 @@ void printParseTree(parseTree *t) {
 
     return;
 }
-
-
 
 int main() {
     parseTree *root = NULL;
@@ -2061,12 +2072,14 @@ int main() {
 
         if (command==0){
             printf("Program has been exited\n");
+            malloc_stats();
             break;
         }
         else if (command==1){
             root = makenode("<main_program>", 0, "", 1, -1, 0);
             parseTree *value = createParseTree(root, stream, temp);
             printf("Parse tree was created.\n\n");
+            destroytreecopy(value);
         }
         else if (command==2){
             root = makenode("<main_program>", 0, "", 1, -1, 0);
@@ -2080,18 +2093,28 @@ int main() {
             *sizeTypeExpTable = 0;
             traverseParseTree(value, &typeExpressionTable, sizeTypeExpTable);
             printf("\n");
+            destroytreecopy(value);
         }
         else if (command==3){
             root = makenode("<main_program>", 0, "", 1, -1, 0);
             parseTree *value = createParseTree(root, stream, temp);
             printf("Parse tree was created.\n");
+            printf("Traversing parse tree\n\n");
+            printf("Printing all the errors!\n\n");
+            
+            eachVariable *typeExpressionTable = NULL;
+            int *sizeTypeExpTable = (int *)malloc(sizeof(int));
+            *sizeTypeExpTable = 0;
+            traverseParseTree(value, &typeExpressionTable, sizeTypeExpTable);
+            printf("\n");
             printf("Printing parse tree\n\n");
-            printf("%-20s IsTerminal     %-20s %-12s %-15s %-5s \n", "Symbol Name","Lexeme", "Line Number", "Grammar Rule", "Depth");
-            for (int i = 0; i < 100; i++) printf("-");
+            printf("%-20s IsTerminal     %-20s %-12s %-15s %-10s %-100s\n", "Symbol Name","Lexeme", "Line Number", "Grammar Rule", "Depth","Type Expression(for non-leaf)");
+            for (int i = 0; i < 160; i++) printf("-");
             printf("\n");
 
             printParseTree(value);
             printf("\n");
+            destroytreecopy(value);
         }
         else if (command==4){
             root = makenode("<main_program>", 0, "", 1, -1, 0);
@@ -2107,6 +2130,7 @@ int main() {
             printf("\nPrinting the Type Expression table\n");
             printTypeExp(typeExpressionTable, *sizeTypeExpTable);
             printf("\n");
+            destroytreecopy(value);
         }
         else {
             printf("Invalid command number. Please enter a command number among the following given:- \n\n");
