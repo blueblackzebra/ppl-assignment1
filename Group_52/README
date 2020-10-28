@@ -1,0 +1,7 @@
+# Assumptions
+
+1. Grammar is assumed to be right associative for arithmetic and boolean operations.
+2. Source code's file name is to be passed as command line argument during execution. (Example: `./a.out t1.txt`)
+3. Jagged array indexing starts from 1.
+
+Enumeration for terminal and non-terminal was not required as per problem statement. So we have used string comparison.
