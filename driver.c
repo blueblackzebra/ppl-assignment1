@@ -1,3 +1,13 @@
+/*
+    GROUP No. 52
+
+    HARSHIT GARG            2018A7PS0218P
+    SPARSH KASANA           2018A7PS0247P
+    ARPIT JAIN              2018A7PS0267P
+    SAMINA SHIRAJ MULANI    2018A7PS0314P
+
+*/
+
 #include <malloc.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -1097,6 +1107,7 @@ eachVariable index_(parseTree *root, eachVariable *typeExpressionTable, int size
         return searchTypeTable(typeExpressionTable, sizeTypeExpTable, root->children[0]->lexeme);
     } else {
         eachVariable t;
+        strcpy(t.var_name, root->children[0]->lexeme);
         t.field2 = 0;
         t.isDynamic = -1;
         t.typeExpression.p.type = INTEGER;
@@ -1553,13 +1564,12 @@ char **returnVar(eachVariable t) {
 void printAssError(parseTree *root, eachVariable t1, eachVariable t2, char *shortMessage) {
     char **t1_str = returnVar(t1);
     char **t2_str = returnVar(t2);
-
-    if (t1.field2 == -1) {
+    if(t1.field2 == -1 && t2.field2 == -1){
         printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
                root->children[1]->line_num,
                "Assignment",
                root->children[1]->lexeme,
-               t1.var_name,
+               "N/A",
                "error",
                "",
                "N/A",
@@ -1567,12 +1577,26 @@ void printAssError(parseTree *root, eachVariable t1, eachVariable t2, char *shor
                "",
                root->depth,
                shortMessage);
+    }
+    else if (t1.field2 == -1) {
+        printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
+               root->children[1]->line_num,
+               "Assignment",
+               root->children[1]->lexeme,
+               "N/A",
+               "error",
+               "",
+               t2_str[0],
+               t2_str[1],
+               t2_str[3],
+               root->depth,
+               shortMessage);
     } else if (t2.field2 == -1) {
         printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
                root->children[1]->line_num,
                "Assignment",
                root->children[1]->lexeme,
-               root->children[0]->typeExpression.var_name,
+               t1_str[0],
                t1_str[1],
                t1_str[3],
                "N/A",
@@ -1585,10 +1609,10 @@ void printAssError(parseTree *root, eachVariable t1, eachVariable t2, char *shor
                root->children[1]->line_num,
                "Assignment",
                root->children[1]->lexeme,
-               root->children[0]->typeExpression.var_name,
+               t1_str[0],
                t1_str[1],
                t1_str[3],
-               root->children[2]->typeExpression.var_name,
+               t2_str[0],
                t2_str[1],
                t2_str[3],
                root->depth,
@@ -1606,10 +1630,11 @@ eachVariable computeExpr4(parseTree *root, eachVariable *typeExpressionTable, in
     }
     root->children[0]->typeExpression = t;
     if (root->child_count == 3) {
+        strcpy(root->typeExpression.var_name, "N/A");
         char shortMessage[31];
         shortMessage[0] = '\0';
         strcat(shortMessage, "Incompatible type for ");
-        (!strcmp(root->children[1]->lexeme, "+")) ? strcat(shortMessage, "addition") : strcat(shortMessage, "subtract");
+        (!strcmp(root->children[1]->lexeme, "/")) ? strcat(shortMessage, "division") : strcat(shortMessage, "multiply");
         eachVariable t2 = computeExpr4(root->children[2], typeExpressionTable, sizeTypeExpTable);
         if (t.field2 == -1 || t2.field2 == -1) {
             root->typeExpression.field2 = -1;
@@ -1619,19 +1644,38 @@ eachVariable computeExpr4(parseTree *root, eachVariable *typeExpressionTable, in
             return root->typeExpression;
         }
         if (t.field2 == 0 && t2.field2 == 0) {
-            if (t.typeExpression.p.type == t2.typeExpression.p.type) {
-                root->typeExpression = t;
-                return root->typeExpression;
+            if (!strcmp(root->children[1]->lexeme, "/")) {
+                if ((t.typeExpression.p.type == INTEGER && t2.typeExpression.p.type == INTEGER) || (t.typeExpression.p.type == REAL && t2.typeExpression.p.type == REAL)) {
+                    root->typeExpression.field2 = 0;
+                    root->typeExpression.typeExpression.p.type = REAL;
+                    return root->typeExpression;
+                }
+            } else {
+                if (t.typeExpression.p.type == t2.typeExpression.p.type) {
+                    root->typeExpression = t;
+                    strcpy(root->typeExpression.var_name, "N/A");
+                    return root->typeExpression;
+                }
             }
         } else if (t.field2 == 1 && t2.field2 == 1) {
-            if (!strcmp(t.typeExpression.r.ranges, t2.typeExpression.r.ranges)) {
-                root->typeExpression = t;
-                return root->typeExpression;
+            if (!strcmp(root->children[1]->lexeme, "/")) {
+                strcpy(shortMessage, "Arrays don't support division");
+            } else {
+                if (!strcmp(t.typeExpression.r.ranges, t2.typeExpression.r.ranges)) {
+                    root->typeExpression = t;
+                    strcpy(root->typeExpression.var_name, "N/A");
+                    return root->typeExpression;
+                }
             }
         } else if (t.field2 == 2 && t2.field2 == 2) {
-            if (!strcmp(t.typeExpression.j.ranges_R1, t2.typeExpression.j.ranges_R1) && !strcmp(t.typeExpression.j.ranges_R2, t2.typeExpression.j.ranges_R2)) {
-                root->typeExpression = t;
-                return root->typeExpression;
+            if (!strcmp(root->children[1]->lexeme, "/")) {
+                strcpy(shortMessage, "Arrays don't support division");
+            } else {
+                if (!strcmp(t.typeExpression.j.ranges_R1, t2.typeExpression.j.ranges_R1) && !strcmp(t.typeExpression.j.ranges_R2, t2.typeExpression.j.ranges_R2)) {
+                    root->typeExpression = t;
+                    strcpy(root->typeExpression.var_name, "N/A");
+                    return root->typeExpression;
+                }
             }
         }
         printAssError(root, t, t2, shortMessage);
@@ -1646,47 +1690,36 @@ eachVariable computeExpr3(parseTree *root, eachVariable *typeExpressionTable, in
     eachVariable t;
     t = computeExpr4(root->children[0], typeExpressionTable, sizeTypeExpTable);
     if (root->child_count == 3) {
+        strcpy(root->typeExpression.var_name, "N/A");
         char shortMessage[31];
         shortMessage[0] = '\0';
         strcat(shortMessage, "Incompatible type for ");
-        (!strcmp(root->children[1]->lexeme, "/")) ? strcat(shortMessage, "division") : strcat(shortMessage, "multiply");
+        (!strcmp(root->children[1]->lexeme, "+")) ? strcat(shortMessage, "addition") : strcat(shortMessage, "subtract");
         eachVariable t2 = computeExpr3(root->children[2], typeExpressionTable, sizeTypeExpTable);
         if (t.field2 == -1 || t2.field2 == -1) {
             root->typeExpression.field2 = -1;
             strcpy(shortMessage, "Error propagated from RHS of ");
             strcat(shortMessage, root->children[1]->lexeme);
+            printAssError(root, t, t2, shortMessage);
             return root->typeExpression;
         }
         if (t.field2 == 0 && t2.field2 == 0) {
-            if (!strcmp(root->children[1]->lexeme, "/")) {
-                if ((t.typeExpression.p.type == INTEGER && t2.typeExpression.p.type == INTEGER) || (t.typeExpression.p.type == REAL && t2.typeExpression.p.type == REAL)) {
-                    root->typeExpression.field2 = 0;
-                    root->typeExpression.typeExpression.p.type = REAL;
-                    return root->typeExpression;
-                }
-            } else {
-                if (t.typeExpression.p.type == t2.typeExpression.p.type) {
-                    root->typeExpression = t;
-                    return root->typeExpression;
-                }
+            if (t.typeExpression.p.type == t2.typeExpression.p.type) {
+                root->typeExpression = t;
+                strcpy(root->typeExpression.var_name, "N/A");
+                return root->typeExpression;
             }
         } else if (t.field2 == 1 && t2.field2 == 1) {
-            if (!strcmp(root->children[1]->lexeme, "/")) {
-                strcpy(shortMessage, "Arrays don't support division");
-            } else {
-                if (!strcmp(t.typeExpression.r.ranges, t2.typeExpression.r.ranges)) {
-                    root->typeExpression = t;
-                    return root->typeExpression;
-                }
+            if (!strcmp(t.typeExpression.r.ranges, t2.typeExpression.r.ranges)) {
+                root->typeExpression = t;
+                strcpy(root->typeExpression.var_name, "N/A");
+                return root->typeExpression;
             }
         } else if (t.field2 == 2 && t2.field2 == 2) {
-            if (!strcmp(root->children[1]->lexeme, "/")) {
-                strcpy(shortMessage, "Arrays don't support division");
-            } else {
-                if (!strcmp(t.typeExpression.j.ranges_R1, t2.typeExpression.j.ranges_R1) && !strcmp(t.typeExpression.j.ranges_R2, t2.typeExpression.j.ranges_R2)) {
-                    root->typeExpression = t;
-                    return root->typeExpression;
-                }
+            if (!strcmp(t.typeExpression.j.ranges_R1, t2.typeExpression.j.ranges_R1) && !strcmp(t.typeExpression.j.ranges_R2, t2.typeExpression.j.ranges_R2)) {
+                root->typeExpression = t;
+                strcpy(root->typeExpression.var_name, "N/A");
+                return root->typeExpression;
             }
         }
         printAssError(root, t, t2, shortMessage);
@@ -1703,11 +1736,11 @@ eachVariable computeExpr2(parseTree *root, eachVariable *typeExpressionTable, in
     if (root->child_count == 3) {
         char shortMessage[31];
         shortMessage[0] = '\0';
-        strcat(shortMessage, "Incompatible type for OR.");
+        strcat(shortMessage, "Incompatible type for AND.");
         eachVariable t2 = computeExpr2(root->children[2], typeExpressionTable, sizeTypeExpTable);
         if (t.field2 == -1 || t2.field2 == -1) {
             root->typeExpression.field2 = -1;
-            printAssError(root, t, t2, "Error propagated from RHS of OR");
+            printAssError(root, t, t2, "Error propagated from RHS of AND");
             return root->typeExpression;
         }
         if (t.field2 == 0 && t2.field2 == 0) {
@@ -1730,16 +1763,18 @@ eachVariable computeExpr1(parseTree *root, eachVariable *typeExpressionTable, in
     if (root->child_count == 3) {
         char shortMessage[31];
         shortMessage[0] = '\0';
-        strcat(shortMessage, "Incompatible type for AND.");
+        strcat(shortMessage, "Incompatible type for OR.");
+        strcpy(root->typeExpression.var_name, "N/A");
         eachVariable t2 = computeExpr1(root->children[2], typeExpressionTable, sizeTypeExpTable);
         if (t.field2 == -1 || t2.field2 == -1) {
             root->typeExpression.field2 = -1;
-            printAssError(root, t, t2, "Error propagated from RHS of AND");
+            printAssError(root, t, t2, "Error propagated from RHS of OR");
             return root->typeExpression;
         }
         if (t.field2 == 0 && t2.field2 == 0) {
             if (t.typeExpression.p.type == BOOLEAN && t2.typeExpression.p.type == BOOLEAN) {
                 root->typeExpression = t;
+                strcpy(root->typeExpression.var_name, "N/A");
                 return t;
             }
         }
