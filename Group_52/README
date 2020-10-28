@@ -1,4 +1,10 @@
-# Assumptions
+Group 52
+Sparsh Kasana         2018A7PS0247P
+Harshit Garg          2018A7PS0218P
+Arpit Jain            2018A7PS0267P
+Samina Shiraj Mulani  2018A7PS0314P
+
+# ASSUMPTIONS
 
 1. Grammar is assumed to be right associative for arithmetic and boolean operations.
 2. Source code's file name is to be passed as command line argument during execution. (Example: `./a.out t1.txt`)
