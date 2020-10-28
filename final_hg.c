@@ -1102,6 +1102,7 @@ void varList(parseTree *root, eachVariable **typeExpressionTable, int *sizeTypeE
     strcpy(t.var_name, root->children[0]->lexeme);
     root->children[0]->typeExpression = t;
     pushTypeTable(typeExpressionTable, sizeTypeExpTable, t);
+    root->typeExpression = t;
     varList(root->children[1], typeExpressionTable, sizeTypeExpTable, t);
 }
 
