@@ -1031,6 +1031,7 @@ eachVariable singlePrim(parseTree *root, eachVariable **typeExpressionTable, int
     }
     root->children[1]->typeExpression = t;
     pushTypeTable(typeExpressionTable, sizeTypeExpTable, t);
+    root->typeExpression = t;
     return t;
 }
 
@@ -1039,6 +1040,7 @@ eachVariable singleJarr2d(parseTree *single_jarr2d, eachVariable **typeExpressio
     retVal = chkJagged2d(single_jarr2d->children[5], single_jarr2d->children[9]);
     strcpy(retVal.var_name, single_jarr2d->children[1]->lexeme);
     pushTypeTable(typeExpressionTable, sizeTypeExpTable, retVal);
+    single_jarr2d->typeExpression = retVal;
     return retVal;
 }
 
@@ -1047,6 +1049,7 @@ eachVariable singleJarr3d(parseTree *single_jarr3d, eachVariable **typeExpressio
     retVal = chkJagged3d(single_jarr3d->children[5], single_jarr3d->children[9]);
     strcpy(retVal.var_name, single_jarr3d->children[1]->lexeme);
     pushTypeTable(typeExpressionTable, sizeTypeExpTable, retVal);
+    single_jarr3d->typeExpression = retVal;
     return retVal;
 }
 
@@ -1096,6 +1099,7 @@ eachVariable singleRarr(parseTree *root, eachVariable **typeExpressionTable, int
     strcat(t.typeExpression.r.ranges, ranges);
     t.typeExpression.r.dimensions = *dim;
     pushTypeTable(typeExpressionTable, sizeTypeExpTable, t);
+    root->typeExpression = t;
     return t;
 }
 
@@ -1150,6 +1154,7 @@ eachVariable listPrim(parseTree *root, eachVariable **typeExpressionTable, int *
     pushTypeTable(typeExpressionTable, sizeTypeExpTable, t);
     // printf("\nI WAS CALLEDHEHE%s\n", root->children[5]->lexeme);
     varList(root->children[6], typeExpressionTable, sizeTypeExpTable, t);
+    root->typeExpression = t;
     return t;
 }
 
@@ -1176,6 +1181,7 @@ eachVariable listRarr(parseTree *root, eachVariable **typeExpressionTable, int *
     root->children[5]->typeExpression = t;
     pushTypeTable(typeExpressionTable, sizeTypeExpTable, t);
     varList(root->children[6], typeExpressionTable, sizeTypeExpTable, t);
+    root->typeExpression = t;
     return t;
 }
 
@@ -1187,6 +1193,7 @@ eachVariable listJarr2d(parseTree *list_jarr2d, eachVariable **typeExpressionTab
     strcpy(retVal.var_name, list_jarr2d->children[5]->lexeme);
     pushTypeTable(typeExpressionTable, sizeTypeExpTable, retVal);
     varList(list_jarr2d->children[6], typeExpressionTable, sizeTypeExpTable, retVal);
+    list_jarr2d->typeExpression = retVal;
     return retVal;
 }
 
@@ -1198,6 +1205,7 @@ eachVariable listJarr3d(parseTree *list_jarr3d, eachVariable **typeExpressionTab
     strcpy(retVal.var_name, list_jarr3d->children[5]->lexeme);
     pushTypeTable(typeExpressionTable, sizeTypeExpTable, retVal);
     varList(list_jarr3d->children[6], typeExpressionTable, sizeTypeExpTable, retVal);
+    list_jarr3d->typeExpression = retVal;
     return retVal;
 }
 
@@ -1588,6 +1596,7 @@ eachVariable array_elem(parseTree *root, eachVariable *typeExpressionTable, int 
     if (t.field2 == -1)  //variable has error in declaration
     {
         ret.field2 = -1;
+        root->typeExpression = ret;
         return ret;
     }
     if (t.isDynamic == 1) {
@@ -1603,14 +1612,17 @@ eachVariable array_elem(parseTree *root, eachVariable *typeExpressionTable, int 
                "***",
                root->children[0]->depth,
                "Dynamic indexing-Runtime check");
+        root->typeExpression = ret;
         return ret;
     } else if (t.field2 == 1 || t.field2 == 2) {  //ARRAY
         int r = chkBound(t, root->children[2], root->children[3], typeExpressionTable, sizeTypeExpTable);
+        root->typeExpression = ret;
         if (!r)  //no error
             return ret;
     }
 
     ret.field2 = -1;
+    root->typeExpression = ret;
     return ret;
 }
 
