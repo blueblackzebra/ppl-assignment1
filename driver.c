@@ -1105,6 +1105,7 @@ void varList(parseTree *root, eachVariable **typeExpressionTable, int *sizeTypeE
     strcpy(t.var_name, root->children[0]->lexeme);
     root->children[0]->typeExpression = t;
     pushTypeTable(typeExpressionTable, sizeTypeExpTable, t);
+    strcpy(t.var_name, "N/A");
     root->typeExpression = t;
     varList(root->children[1], typeExpressionTable, sizeTypeExpTable, t);
 }
@@ -1137,6 +1138,7 @@ eachVariable listPrim(parseTree *root, eachVariable **typeExpressionTable, int *
     pushTypeTable(typeExpressionTable, sizeTypeExpTable, t);
     // printf("\nI WAS CALLEDHEHE%s\n", root->children[5]->lexeme);
     varList(root->children[6], typeExpressionTable, sizeTypeExpTable, t);
+    strcpy(t.var_name, "N/A");
     root->typeExpression = t;
     return t;
 }
@@ -1164,6 +1166,7 @@ eachVariable listRarr(parseTree *root, eachVariable **typeExpressionTable, int *
     root->children[5]->typeExpression = t;
     pushTypeTable(typeExpressionTable, sizeTypeExpTable, t);
     varList(root->children[6], typeExpressionTable, sizeTypeExpTable, t);
+    strcpy(t.var_name, "N/A");
     root->typeExpression = t;
     return t;
 }
@@ -1177,6 +1180,7 @@ eachVariable listJarr2d(parseTree *list_jarr2d, eachVariable **typeExpressionTab
     pushTypeTable(typeExpressionTable, sizeTypeExpTable, retVal);
     varList(list_jarr2d->children[6], typeExpressionTable, sizeTypeExpTable, retVal);
     list_jarr2d->typeExpression = retVal;
+    strcpy(retVal.var_name, "N/A");
     return retVal;
 }
 
@@ -1189,6 +1193,7 @@ eachVariable listJarr3d(parseTree *list_jarr3d, eachVariable **typeExpressionTab
     pushTypeTable(typeExpressionTable, sizeTypeExpTable, retVal);
     varList(list_jarr3d->children[6], typeExpressionTable, sizeTypeExpTable, retVal);
     list_jarr3d->typeExpression = retVal;
+    strcpy(retVal.var_name, "N/A");
     return retVal;
 }
 
