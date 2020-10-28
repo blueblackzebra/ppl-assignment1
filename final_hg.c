@@ -3,6 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+char filename[] = "grammar.txt";
+
+char sourcename[] = "testcases/t4.txt";
+
 enum primitiveType { INTEGER = 1,
                      REAL = 2,
                      BOOLEAN = 3 };
@@ -47,10 +51,6 @@ typedef struct error {
     char message[31];
 } error;
 
-// typedef union{
-//     //insert type fields here
-//     char* type;
-// }Type_exp;
 
 // Parse tree stucture
 
@@ -94,24 +94,6 @@ parseTree *insert(parseTree *node, char *str, int terminal, char *lex, int grule
     node->children[node->child_count] = temp;
     node->child_count++;
     return temp;
-}
-
-void printTree(parseTree *t) {
-    if (t == NULL) {
-        return;
-    }
-    if (t->is_terminal) {
-        printf("%-20s TERMINAL       %-20s %-12d %-4d %-4d\n", t->nodename, t->lexeme, t->line_num, t->gramRule, t->depth);
-    } else {
-        char ran[] = "NOT DEFINED";
-        printf("%-20s NON-TERMINAL   %-20s %-12s %-4d %-4d\n", t->nodename, ran, ran, t->gramRule, t->depth);
-    }
-
-    for (int i = 0; i < t->child_count; i++) {
-        printTree(t->children[i]);
-    }
-
-    return;
 }
 
 parseTree *makeTreeCopy(parseTree *t) {
@@ -252,8 +234,6 @@ typedef struct {
     struct Node **rules;
 } grammar;
 
-char filename[] = "grammar.txt";
-
 void traverseG(grammar *G) {
     struct Node **p = G->rules;
 
@@ -331,8 +311,6 @@ struct Symbol {
 };
 
 typedef struct Symbol tokenStream;
-
-char sourcename[] = "testcases/t4.txt";
 
 void traverseS(tokenStream *s) {
     printf("\nTraversal begins\n");
@@ -2023,6 +2001,29 @@ void printTypeExp(eachVariable *typeExpressionTable, int sizeTypeExpTable) {
     }
 }
 
+void printParseTree(parseTree *t) {
+    char ** typexp= returnVar(t->typeExpression);
+    // printf("%s\n", (t->typeExpression).var_name);
+
+    if (t == NULL) {
+        return;
+    }
+    if (t->is_terminal) {
+        printf("%-20s TERMINAL       %-20s %-12d %-15d %-5d \n", t->nodename, t->lexeme, t->line_num, t->gramRule, t->depth);
+    } else {
+        char ran[] = "NOT DEFINED";
+        printf("%-20s NON-TERMINAL   %-20s %-12s %-15d %-5d \n", t->nodename, ran, ran, t->gramRule, t->depth);
+    }
+
+    for (int i = 0; i < t->child_count; i++) {
+        printParseTree(t->children[i]);
+    }
+
+    return;
+}
+
+
+
 int main() {
     parseTree *root = NULL;
 
@@ -2031,49 +2032,84 @@ int main() {
 
     tokenStream *stream;
     stream = tokeniseSourceCode(sourcename, stream);
-    // tokenStream * copy1=stream;
 
-    root = makenode("<main_program>", 0, "", 1, -1, 0);
+    printf("Available command numbers:- \n");
+    printf("1 -> Creates a parse tree for the file specified. Does not print any of the data structures.\n");
+    printf("2 -> Creates a parse tree and traverses it, printing all the errors found in the source code.\n");
+    printf("3 -> Creates a parse tree and prints it as per the format specified\n");
+    printf("4 -> Creates a parse tree, traverses it and prints all the errors found as well as the Type Expression table.\n\n");
+    
+    while (1){
+        int command;
+        
+        printf("ENTER COMMAND NUMBER\n");
+        fflush(stdout);
+        scanf("%d",&command);
+        printf("Option selected was %d\n\n",command);
 
-    // malloc_stats();
+        if (command==0){
+            printf("Program has been exited\n");
+            break;
+        }
+        else if (command==1){
+            root = makenode("<main_program>", 0, "", 1, -1, 0);
+            parseTree *value = createParseTree(root, stream, temp);
+            printf("Parse tree was created.\n\n");
+        }
+        else if (command==2){
+            root = makenode("<main_program>", 0, "", 1, -1, 0);
+            parseTree *value = createParseTree(root, stream, temp);
+            printf("Parse tree was created.\n");
+            printf("Traversing parse tree\n\n");
+            printf("Printing all the errors!\n\n");
+            
+            eachVariable *typeExpressionTable = NULL;
+            int *sizeTypeExpTable = (int *)malloc(sizeof(int));
+            *sizeTypeExpTable = 0;
+            traverseParseTree(value, &typeExpressionTable, sizeTypeExpTable);
+            printf("\n");
+        }
+        else if (command==3){
+            root = makenode("<main_program>", 0, "", 1, -1, 0);
+            parseTree *value = createParseTree(root, stream, temp);
+            printf("Parse tree was created.\n");
+            printf("Printing parse tree\n\n");
+            printf("%-20s IsTerminal     %-20s %-12s %-15s %-5s \n", "Symbol Name","Lexeme", "Line Number", "Grammar Rule", "Depth");
+            for (int i = 0; i < 100; i++) printf("-");
+            printf("\n");
 
-    parseTree *value = createParseTree(root, stream, temp);
+            printParseTree(value);
+            printf("\n");
+        }
+        else if (command==4){
+            root = makenode("<main_program>", 0, "", 1, -1, 0);
+            parseTree *value = createParseTree(root, stream, temp);
+            printf("Parse tree was created.\n");
+            printf("Traversing parse tree\n\n");
+            printf("Printing all the errors!\n\n");
+            
+            eachVariable *typeExpressionTable = NULL;
+            int *sizeTypeExpTable = (int *)malloc(sizeof(int));
+            *sizeTypeExpTable = 0;
+            traverseParseTree(value, &typeExpressionTable, sizeTypeExpTable);
+            printf("\nPrinting the Type Expression table\n");
+            printTypeExp(typeExpressionTable, *sizeTypeExpTable);
+            printf("\n");
+        }
+        else {
+            printf("Invalid command number. Please enter a command number among the following given:- \n\n");
+            printf("Available command numbers:- \n");
+            printf("1 -> Creates a parse tree for the file specified. Does not print any of the data structures.\n");
+            printf("2 -> Creates a parse tree and traverses it, printing all the errors found in the source code.\n");
+            printf("3 -> Creates a parse tree and prints it as per the format specified\n");
+            printf("4 -> Creates a parse tree, traverses it and prints all the errors found as well as the Type Expression table.\n");
+            printf("\n");
+        }
 
-    // printf("current tree is: \n");
-    // printTree(value);
-    printf("\nTree is \n");
-    // stackNode * first=NULL;
-    // stackNode * second=NULL;
-    // stackNode * x=makestackNode(NULL,-1,value);
-    // push(&first,x);
-    printTree(value);
-    printf("Tree end\n\n");
-
-    if (value) {
-        printf("1\n");
-    } else {
-        printf("0\n");
+        printf("COMMAND COMPLETED\n\n");
     }
 
-    // malloc_stats();
 
-    eachVariable *typeExpressionTable = NULL;
-    int *sizeTypeExpTable = (int *)malloc(sizeof(int));
-    *sizeTypeExpTable = 0;
-    traverseParseTree(value, &typeExpressionTable, sizeTypeExpTable);
-    printTypeExp(typeExpressionTable, *sizeTypeExpTable);
-    // getToken("{");
-
-    // malloc_stats();
-
-    // stackNode * das =(stackNode *)malloc(sizeof(stackNode));
-    // printf("%lu %lu\n",sizeof(stackNode),sizeof(parseTree));
-
-    // // malloc_stats();
-
-    // free(das);
-
-    // malloc_stats();
-
+    
     return 0;
 }
