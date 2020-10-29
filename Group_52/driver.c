@@ -2094,6 +2094,7 @@ int main(int argc, char * argv[]) {
     }
 
     printf("Available command numbers:- \n");
+    printf("0 -> Exit.\n");
     printf("1 -> Creates a parse tree for the file specified. Does not print any of the data structures.\n");
     printf("2 -> Creates a parse tree and traverses it, printing all the errors found in the source code.\n");
     printf("3 -> Creates a parse tree and prints it as per the format specified\n");
@@ -2171,6 +2172,7 @@ int main(int argc, char * argv[]) {
         else {
             printf("Invalid command number. Please enter a command number among the following given:- \n\n");
             printf("Available command numbers:- \n");
+            printf("0 -> Exit.\n");
             printf("1 -> Creates a parse tree for the file specified. Does not print any of the data structures.\n");
             printf("2 -> Creates a parse tree and traverses it, printing all the errors found in the source code.\n");
             printf("3 -> Creates a parse tree and prints it as per the format specified\n");
