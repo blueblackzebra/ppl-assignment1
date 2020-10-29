@@ -1578,6 +1578,11 @@ void printAssError(parseTree *root, eachVariable t1, eachVariable t2, char *shor
                shortMessage);
     }
     else if (t1.field2 == -1) {
+        char * mess=(char *)malloc(50*sizeof(char));
+        if (strlen(shortMessage)>=23){
+            strcpy(mess,shortMessage);
+            mess[22]='L';
+        }
         printf("%-15d %-15s %-10s %-20s %-20s %-100s %-20s %-20s %-100s %-5d %-30s\n",
                root->children[1]->line_num,
                "Assignment",
@@ -1589,7 +1594,7 @@ void printAssError(parseTree *root, eachVariable t1, eachVariable t2, char *shor
                t2_str[1],
                t2_str[3],
                root->depth,
-               shortMessage);
+               mess);
     } else if (t2.field2 == -1) {
         printf("%-15d %-15s %-10s %-20s %-20s %-100s %-20s %-20s %-100s %-5d %-30s\n",
                root->children[1]->line_num,
