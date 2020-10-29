@@ -531,7 +531,7 @@ eachVariable chkJagged2d(parseTree *dim_jarr2d, parseTree *ranges_desc) {
                 if (line_num < temp_line_num)
                     line_num = temp_line_num;
                 retVal.field2 = -1;
-                printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
+                printf("%-15d %-15s %-10s %-20s %-20s %-100s %-20s %-20s %-100s %-5d %-30s\n",
                        line_num,
                        "Declaration",
                        "***",
@@ -584,7 +584,7 @@ eachVariable chkJagged2d(parseTree *dim_jarr2d, parseTree *ranges_desc) {
                 line_num = temp_line_num;
             retVal.field2 = -1;
 
-            printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
+            printf("%-15d %-15s %-10s %-20s %-20s %-100s %-20s %-20s %-100s %-5d %-30s\n",
                    line_num,
                    "Declaration",
                    "***",
@@ -613,7 +613,7 @@ eachVariable chkJagged2d(parseTree *dim_jarr2d, parseTree *ranges_desc) {
             if (line_num < temp_line_num)
                 line_num = temp_line_num;
             retVal.field2 = -1;
-            printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
+            printf("%-15d %-15s %-10s %-20s %-20s %-100s %-20s %-20s %-100s %-5d %-30s\n",
                    line_num,
                    "Declaration",
                    "***",
@@ -644,7 +644,7 @@ eachVariable chkJagged2d(parseTree *dim_jarr2d, parseTree *ranges_desc) {
         if (line_num < temp_line_num)
             line_num = temp_line_num;
         retVal.field2 = -1;
-        printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
+        printf("%-15d %-15s %-10s %-20s %-20s %-100s %-20s %-20s %-100s %-5d %-30s\n",
                line_num,
                "Declaration",
                "***",
@@ -720,7 +720,7 @@ eachVariable chkJagged3d(parseTree *dim_jarr3d, parseTree *ranges_desc) {
                 if (line_num < temp_line_num)
                     line_num = temp_line_num;
                 retVal.field2 = -1;
-                printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
+                printf("%-15d %-15s %-10s %-20s %-20s %-100s %-20s %-20s %-100s %-5d %-30s\n",
                        line_num,
                        "Declaration",
                        "***",
@@ -775,7 +775,7 @@ eachVariable chkJagged3d(parseTree *dim_jarr3d, parseTree *ranges_desc) {
             if (line_num < temp_line_num)
                 line_num = temp_line_num;
             retVal.field2 = -1;
-            printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
+            printf("%-15d %-15s %-10s %-20s %-20s %-100s %-20s %-20s %-100s %-5d %-30s\n",
                    line_num,
                    "Declaration",
                    "***",
@@ -813,7 +813,7 @@ eachVariable chkJagged3d(parseTree *dim_jarr3d, parseTree *ranges_desc) {
             if (line_num < temp_line_num)
                 line_num = temp_line_num;
             retVal.field2 = -1;
-            printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
+            printf("%-15d %-15s %-10s %-20s %-20s %-100s %-20s %-20s %-100s %-5d %-30s\n",
                    line_num,
                    "Declaration",
                    "***",
@@ -843,7 +843,7 @@ eachVariable chkJagged3d(parseTree *dim_jarr3d, parseTree *ranges_desc) {
         if (line_num < temp_line_num)
             line_num = temp_line_num;
         retVal.field2 = -1;
-        printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
+        printf("%-15d %-15s %-10s %-20s %-20s %-100s %-20s %-20s %-100s %-5d %-30s\n",
                line_num,
                "Declaration",
                "***",
@@ -1136,7 +1136,7 @@ int chkBound(eachVariable t, parseTree *index_, parseTree *index_list, eachVaria
             if (!strcmp(index_->children[0]->nodename, "VAR_NAME")) {
                 eachVariable varType = searchTypeTable(typeExpressionTable, sizeTypeExpTable, index_->children[0]->lexeme);
                 if (varType.field2 != 0 || (varType.field2 == 0 && varType.typeExpression.p.type != INTEGER)) {
-                    printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
+                    printf("%-15d %-15s %-10s %-20s %-20s %-100s %-20s %-20s %-100s %-5d %-30s\n",
                            index_->children[0]->line_num,
                            "Assignment",
                            "***",
@@ -1150,7 +1150,7 @@ int chkBound(eachVariable t, parseTree *index_, parseTree *index_list, eachVaria
                            "Invalid index type");
                     return 1;
                 }
-                printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
+                printf("%-15d %-15s %-10s %-20s %-20s %-100s %-20s %-20s %-100s %-5d %-30s\n",
                        index_->children[0]->line_num,
                        "Warning",
                        "***",
@@ -1168,7 +1168,7 @@ int chkBound(eachVariable t, parseTree *index_, parseTree *index_list, eachVaria
                 int right = dimRanges[ind * 2 + 1];
                 int currIndVal = atoi(index_->children[0]->lexeme);
                 if (!(left <= currIndVal && right >= currIndVal)) {
-                    printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
+                    printf("%-15d %-15s %-10s %-20s %-20s %-100s %-20s %-20s %-100s %-5d %-30s\n",
                            index_->children[0]->line_num,
                            "Assignment",
                            "***",
@@ -1209,7 +1209,7 @@ int chkBound(eachVariable t, parseTree *index_, parseTree *index_list, eachVaria
         if (!strcmp(index_->children[0]->nodename, "VAR_NAME")) {
             eachVariable varType = searchTypeTable(typeExpressionTable, sizeTypeExpTable, index_->children[0]->lexeme);
             if (varType.field2 != 0 || (varType.field2 == 0 && varType.typeExpression.p.type != INTEGER)) {
-                printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
+                printf("%-15d %-15s %-10s %-20s %-20s %-100s %-20s %-20s %-100s %-5d %-30s\n",
                        index_->children[0]->line_num,
                        "Assignment",
                        "***",
@@ -1223,7 +1223,7 @@ int chkBound(eachVariable t, parseTree *index_, parseTree *index_list, eachVaria
                        "Invalid index type");
                 return 1;
             }
-            printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
+            printf("%-15d %-15s %-10s %-20s %-20s %-100s %-20s %-20s %-100s %-5d %-30s\n",
                    index_->children[0]->line_num,
                    "Warning",
                    "***",
@@ -1239,7 +1239,7 @@ int chkBound(eachVariable t, parseTree *index_, parseTree *index_list, eachVaria
         } else if (!strcmp(index_->children[0]->nodename, "STATIC_CNST")) {
             firstIndex = atoi(index_->children[0]->lexeme);
             if (!(range1[0] <= firstIndex && range1[1] >= firstIndex)) {
-                printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
+                printf("%-15d %-15s %-10s %-20s %-20s %-100s %-20s %-20s %-100s %-5d %-30s\n",
                        index_->children[0]->line_num,
                        "Assignment",
                        "***",
@@ -1272,7 +1272,7 @@ int chkBound(eachVariable t, parseTree *index_, parseTree *index_list, eachVaria
             if (!strcmp(index_->children[0]->nodename, "VAR_NAME")) {
                 eachVariable varType = searchTypeTable(typeExpressionTable, sizeTypeExpTable, index_->children[0]->lexeme);
                 if (varType.field2 != 0 || (varType.field2 == 0 && varType.typeExpression.p.type != INTEGER)) {
-                    printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
+                    printf("%-15d %-15s %-10s %-20s %-20s %-100s %-20s %-20s %-100s %-5d %-30s\n",
                            index_->children[0]->line_num,
                            "Assignment",
                            "***",
@@ -1287,7 +1287,7 @@ int chkBound(eachVariable t, parseTree *index_, parseTree *index_list, eachVaria
                     return 1;
                 }
 
-                printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
+                printf("%-15d %-15s %-10s %-20s %-20s %-100s %-20s %-20s %-100s %-5d %-30s\n",
                        index_->children[0]->line_num,
                        "Warning",
                        "***",
@@ -1303,7 +1303,7 @@ int chkBound(eachVariable t, parseTree *index_, parseTree *index_list, eachVaria
             } else if (!strcmp(index_->children[0]->nodename, "STATIC_CNST")) {
                 int currIndVal = atoi(index_->children[0]->lexeme);
                 if (!(1 <= currIndVal && secondIndMax >= currIndVal)) {
-                    printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
+                    printf("%-15d %-15s %-10s %-20s %-20s %-100s %-20s %-20s %-100s %-5d %-30s\n",
                            index_->children[0]->line_num,
                            "Assignment",
                            "***",
@@ -1338,7 +1338,7 @@ int chkBound(eachVariable t, parseTree *index_, parseTree *index_list, eachVaria
             if (!strcmp(index_->children[0]->nodename, "VAR_NAME")) {
                 eachVariable varType = searchTypeTable(typeExpressionTable, sizeTypeExpTable, index_->children[0]->lexeme);
                 if (varType.field2 != 0 || (varType.field2 == 0 && varType.typeExpression.p.type != INTEGER)) {
-                    printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
+                    printf("%-15d %-15s %-10s %-20s %-20s %-100s %-20s %-20s %-100s %-5d %-30s\n",
                            index_->children[0]->line_num,
                            "Assignment",
                            "***",
@@ -1353,7 +1353,7 @@ int chkBound(eachVariable t, parseTree *index_, parseTree *index_list, eachVaria
                     return 1;
                 }
 
-                printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
+                printf("%-15d %-15s %-10s %-20s %-20s %-100s %-20s %-20s %-100s %-5d %-30s\n",
                        index_->children[0]->line_num,
                        "Warning",
                        "***",
@@ -1369,7 +1369,7 @@ int chkBound(eachVariable t, parseTree *index_, parseTree *index_list, eachVaria
             } else if (!strcmp(index_->children[0]->nodename, "STATIC_CNST")) {
                 secondIndex = atoi(index_->children[0]->lexeme);
                 if (!(1 <= secondIndex && secondIndMax >= secondIndex)) {
-                    printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
+                    printf("%-15d %-15s %-10s %-20s %-20s %-100s %-20s %-20s %-100s %-5d %-30s\n",
                            index_->children[0]->line_num,
                            "Assignment",
                            "***",
@@ -1396,7 +1396,7 @@ int chkBound(eachVariable t, parseTree *index_, parseTree *index_list, eachVaria
             if (!strcmp(index_->children[0]->nodename, "VAR_NAME")) {
                 eachVariable varType = searchTypeTable(typeExpressionTable, sizeTypeExpTable, index_->children[0]->lexeme);
                 if (varType.field2 != 0 || (varType.field2 == 0 && varType.typeExpression.p.type != INTEGER)) {
-                    printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
+                    printf("%-15d %-15s %-10s %-20s %-20s %-100s %-20s %-20s %-100s %-5d %-30s\n",
                            index_->children[0]->line_num,
                            "Assignment",
                            "***",
@@ -1411,7 +1411,7 @@ int chkBound(eachVariable t, parseTree *index_, parseTree *index_list, eachVaria
                     return 1;
                 }
 
-                printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
+                printf("%-15d %-15s %-10s %-20s %-20s %-100s %-20s %-20s %-100s %-5d %-30s\n",
                        index_->children[0]->line_num,
                        "Warning",
                        "***",
@@ -1427,7 +1427,7 @@ int chkBound(eachVariable t, parseTree *index_, parseTree *index_list, eachVaria
             } else if (!strcmp(index_->children[0]->nodename, "STATIC_CNST")) {
                 thirdIndex = atoi(index_->children[0]->lexeme);
                 if (!(1 <= thirdIndex && thirdIndMax >= thirdIndex)) {
-                    printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
+                    printf("%-15d %-15s %-10s %-20s %-20s %-100s %-20s %-20s %-100s %-5d %-30s\n",
                            index_->children[0]->line_num,
                            "Assignment",
                            "***",
@@ -1462,7 +1462,7 @@ eachVariable array_elem(parseTree *root, eachVariable *typeExpressionTable, int 
         return ret;
     }
     if (t.isDynamic == 1) {
-        printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
+        printf("%-15d %-15s %-10s %-20s %-20s %-100s %-20s %-20s %-100s %-5d %-30s\n",
                root->children[0]->line_num,
                "Warning",
                "***",
@@ -1564,7 +1564,7 @@ void printAssError(parseTree *root, eachVariable t1, eachVariable t2, char *shor
     char **t1_str = returnVar(t1);
     char **t2_str = returnVar(t2);
     if(t1.field2 == -1 && t2.field2 == -1){
-        printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
+        printf("%-15d %-15s %-10s %-20s %-20s %-100s %-20s %-20s %-100s %-5d %-30s\n",
                root->children[1]->line_num,
                "Assignment",
                root->children[1]->lexeme,
@@ -1578,7 +1578,7 @@ void printAssError(parseTree *root, eachVariable t1, eachVariable t2, char *shor
                shortMessage);
     }
     else if (t1.field2 == -1) {
-        printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
+        printf("%-15d %-15s %-10s %-20s %-20s %-100s %-20s %-20s %-100s %-5d %-30s\n",
                root->children[1]->line_num,
                "Assignment",
                root->children[1]->lexeme,
@@ -1591,7 +1591,7 @@ void printAssError(parseTree *root, eachVariable t1, eachVariable t2, char *shor
                root->depth,
                shortMessage);
     } else if (t2.field2 == -1) {
-        printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
+        printf("%-15d %-15s %-10s %-20s %-20s %-100s %-20s %-20s %-100s %-5d %-30s\n",
                root->children[1]->line_num,
                "Assignment",
                root->children[1]->lexeme,
@@ -1604,7 +1604,7 @@ void printAssError(parseTree *root, eachVariable t1, eachVariable t2, char *shor
                root->depth,
                shortMessage);
     } else {
-        printf("%-15d %-15s %-10s %-20s %-20s %-70s %-20s %-20s %-70s %-5d %-30s\n",
+        printf("%-15d %-15s %-10s %-20s %-20s %-100s %-20s %-20s %-100s %-5d %-30s\n",
                root->children[1]->line_num,
                "Assignment",
                root->children[1]->lexeme,
@@ -2018,8 +2018,8 @@ parseTree *createParseTree(parseTree *root, tokenStream *ts, grammar *G) {
 }
 
 void traverseParseTree(parseTree *root, eachVariable **typeExpressionTable, int *sizeTypeExpTable) {
-    printf("%-15s %-15s %-10s %-20s %-91s %-20s %-91s %-5s %-30s\n", "Line number", "Statement type", "Operator", "Lexeme of 1st", "Type of 1st", "Lexeme of 2nd", "Type of 2nd", "Depth", "Short Message");
-    for (int i = 0; i < 300; i++) printf("-");
+    printf("%-15s %-15s %-10s %-20s %-121s %-20s %-121s %-5s %-30s\n", "Line number", "Statement type", "Operator", "Lexeme of 1st", "Type of 1st", "Lexeme of 2nd", "Type of 2nd", "Depth", "Short-Message");
+    for (int i = 0; i < 380; i++) printf("-");
     printf("\n");
     traverseDeclStmt(root->children[4], typeExpressionTable, sizeTypeExpTable);
     
@@ -2061,7 +2061,7 @@ void printParseTree(parseTree *t) {
 void printTypeExpressionTable(eachVariable *typeExpressionTable, int sizeTypeExpTable) {
     printf("\n");
     printf("%-19s %-16s %-21s %-60s\n", "Variable name", "Is Dynamic?", "basicElementType", "Data type");
-    for (int i = 0; i < 120; i++) printf("-");
+    for (int i = 0; i < 170; i++) printf("-");
     printf("\n");
     for (int i = 0; i < sizeTypeExpTable; ++i) {
         eachVariable t = typeExpressionTable[i];
@@ -2140,7 +2140,7 @@ int main(int argc, char * argv[]) {
             printf("\n");
             printf("Printing parse tree\n\n");
             printf("%-20s IsTerminal     %-20s %-12s %-15s %-10s %-100s\n", "Symbol Name","Lexeme", "Line Number", "Grammar Rule", "Depth","Type Expression(for non-leaf)");
-            for (int i = 0; i < 160; i++) printf("-");
+            for (int i = 0; i < 180; i++) printf("-");
             printf("\n");
 
             printParseTree(value);
