@@ -912,7 +912,6 @@ eachVariable singleJarr3d(parseTree *single_jarr3d, eachVariable **typeExpressio
 char *dimrarr(parseTree *root, char *ranges, int *dim, int *dyn) {
     char *lval = root->children[0]->children[1]->children[0]->lexeme;
     char *rval = root->children[0]->children[3]->children[0]->lexeme;
-    *dyn = 0;
     if (!(lval[0] >= 48 && lval[0] <= 57 && rval[0] >= 48 && rval[0] <= 57)) {
         *dyn = 1;
     }
